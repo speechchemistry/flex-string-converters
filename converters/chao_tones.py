@@ -16,61 +16,94 @@
 
 import sys
 import argparse
-import re
 import unicodedata
 import regex
 
 
-# The following find and replace function is by Darius Bacon
-# from: https://stackoverflow.com/a/765835 CC-BY-SA
-def multisub(subs, subject):
-    "Simultaneously perform all substitutions on the subject string."
-    pattern = '|'.join('(%s)' % re.escape(p) for p, s in subs)
-    substs = [s for p, s in subs]
-    replace = lambda m: substs[m.lastindex - 1]
-    return re.sub(pattern, replace, subject)
-
 # The 13 recognised tone-accent combining marks and the Chao tone letters
 # each maps to. Both extract_chao_letters() and convert() derive from this
-# one list, so the codepoint set is never duplicated.
-ACCENT_TO_TONE_LETTERS = [('\u030B','˥'), # ő
-                   ('\u0301','˦'), # ó
-                   ('\u0304','˧'), # ō
-                   ('\u0300','˨'), # ò
-                   ('\u030F','˩'), # ȍ
-                   ('\u030C','˨˦'), # ǒ trying to be more consistent than IPA chart
-                   ('\u0302','˦˨'), # ô trying to be more consistent than IPA chart
-                   ('\u1DC4','˧˦'), # o᷄ trying to be more consistent than IPA chart
-                   ('\u1DC5','˨˧'), # o᷅ trying to be more consistent than IPA chart
-                   ('\u1DC8','˨˦˨'), # o᷈ trying to be more consistent than IPA chart
-                   ('\u1DC6','˧˨'), # o᷆
-                   ('\u1DC7','˦˧'), # o᷇
-                   ('\u1DC9','˦˨˦')] # o᷉
+# one table, so the codepoint set is never duplicated.
+ACCENT_TO_TONE_LETTERS = {'̋':'˥', # ő
+                   '́':'˦', # ó
+                   '̄':'˧', # ō
+                   '̀':'˨', # ò
+                   '̏':'˩', # ȍ
+                   '̌':'˨˦', # ǒ trying to be more consistent than IPA chart
+                   '̂':'˦˨', # ô trying to be more consistent than IPA chart
+                   '᷄':'˧˦', # o᷄ trying to be more consistent than IPA chart
+                   '᷅':'˨˧', # o᷅ trying to be more consistent than IPA chart
+                   '᷈':'˨˦˨', # o᷈ trying to be more consistent than IPA chart
+                   '᷆':'˧˨', # o᷆
+                   '᷇':'˦˧', # o᷇
+                   '᷉':'˦˨˦'} # o᷉
 
-TONE_ACCENT_MARKS = frozenset(mark for mark, _ in ACCENT_TO_TONE_LETTERS)
+TONE_ACCENT_MARKS = frozenset(ACCENT_TO_TONE_LETTERS)
+
+# Tone-bearing vowels: the base letter of a grapheme cluster counts as a
+# vowel for grouping tone accents into syllables. Change 2
+# (converters/chao_accents.py) keeps its own copy rather than importing this
+# one, since a converter must stand alone as a FLEx Process.
+TONE_BEARING_VOWELS = frozenset(
+    'a e i o u y ɨ ʉ ɯ ɪ ʏ ʊ ø ɘ ɵ ɤ ə ɛ œ ɜ ɞ ʌ ɔ æ ɐ ɶ ɑ ɒ ɚ ɝ'.split(' '))
+
+# A cluster carrying one of these is its own tone-bearing unit, even when
+# its base letter is a consonant, and it never joins a following vowel.
+SYLLABIC_MARKS = frozenset({'̩', '̍'})
+
+
+def _tone_bearing_units(word):
+    # Walk word (already NFD-normalised) by grapheme cluster, grouping
+    # consecutive vowel clusters into one unit (a diphthong is one
+    # syllable), splitting out a syllabic-marked cluster as its own unit,
+    # and treating a modifier letter (category Lm, e.g. the length mark ː)
+    # as transparent: it neither starts a unit nor breaks a vowel run.
+    # Anything else (a consonant, punctuation, a digit) breaks a vowel run
+    # without starting a unit of its own.
+    units = []
+    current_run = None
+    for cluster in regex.findall(r'\X', word):
+        base = cluster[0]
+        marks = [mark for mark in cluster[1:] if mark in TONE_ACCENT_MARKS]
+        if any(mark in SYLLABIC_MARKS for mark in cluster[1:]):
+            if current_run is not None:
+                units.append(current_run)
+                current_run = None
+            units.append(marks)
+        elif base in TONE_BEARING_VOWELS:
+            if current_run is None:
+                current_run = []
+            current_run.extend(marks)
+        elif unicodedata.category(base) == 'Lm':
+            pass
+        elif current_run is not None:
+            units.append(current_run)
+            current_run = None
+    if current_run is not None:
+        units.append(current_run)
+    return units
+
+def _collapse_adjacent_duplicates(tone_letters):
+    collapsed = []
+    for letter in tone_letters:
+        if not collapsed or collapsed[-1] != letter:
+            collapsed.append(letter)
+    return ''.join(collapsed)
 
 def extract_chao_letters(input_string):
-    # ensure string is decomposed into separate code points
+    # ensure string is decomposed into separate code points, so a cluster's
+    # base letter and its combining accent marks are separate code points
     input_decomposed = unicodedata.normalize('NFD',input_string)
-    # find any run of items that aren't a space or a recognised accent mark
-    # and replace it with a space, BEFORE substituting accents for tone
-    # letters. Filtering first, rather than filtering by tone letter after
-    # substitution, means a Chao tone letter already present in the input is
-    # ordinary text as far as this function is concerned: it collapses away
-    # like any other character instead of being indistinguishable from (and
-    # so kept alongside) a tone letter this function actually extracted.
-    non_accent_run = '[^\\s' + ''.join(regex.escape(mark) for mark in TONE_ACCENT_MARKS) + ']+'
-    accents_in_spaces = regex.sub(non_accent_run,' ',input_decomposed)
-    # replace all possible accents with chao tone letters
-    chao_in_text = multisub(ACCENT_TO_TONE_LETTERS, accents_in_spaces)
-    # convert any three space runs between words to two space runs
-    # (three spaces occur after any codas and before another word)
-    chao_two_space_gaps = regex.sub(r'   ','  ',chao_in_text)
-    # then just remove any initial whitespace
-    no_leading_spaces = regex.sub(r'^\s+','',chao_two_space_gaps)
-    # remove any leading whitespace
-    output = regex.sub(r'\s+$','',no_leading_spaces)
-    return output
+    word_groups = []
+    for word in input_decomposed.split():
+        groups = []
+        for marks in _tone_bearing_units(word):
+            if not marks:
+                continue
+            tone_letters = ''.join(ACCENT_TO_TONE_LETTERS[mark] for mark in marks)
+            groups.append(_collapse_adjacent_duplicates(tone_letters))
+        if groups:
+            word_groups.append(' '.join(groups))
+    return '  '.join(word_groups)
 
 def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
     # ensure string is decomposed into separate code points, so tone-accent

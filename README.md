@@ -79,4 +79,4 @@ To add a fixture or approve a changed one: drop or edit a `.txt` file under `inp
 
 `Extract_Chao_tone_letters_from_accent_notation.py` was extracted from [flextools_modules](https://github.com/speechchemistry/flextools_modules), which keeps a mirrored copy for now. **This repository is the canonical one.** Modules that walk the FLEx model rather than transform a string — such as `Fix_Pronunciation_Media_Paths.py` — stay there.
 
-Attributions: This repository includes code from C D Farrows (licensed under LGPL 2.1) in `Extract_Chao_tone_letters_from_accent_notation.py` and Darius Bacon (licensed under CC-BY-SA) in `converters/chao_tones.py`. Combining these licences results in a GPL 3 licence. Please see the source code for more attribution information.
+Attributions: This repository includes code from C D Farrows (licensed under LGPL 2.1) in `Extract_Chao_tone_letters_from_accent_notation.py`, so that file's licence is LGPL 2.1. Please see the source code for more attribution information.

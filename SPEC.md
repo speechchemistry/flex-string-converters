@@ -12,9 +12,15 @@ Converter: `converters/chao_tones.py`. Takes and returns a plain string via `con
 
 **Transform of `extract_chao_letters()`.**
 
-1. The input is normalised to NFD, so accents are separate combining code points.
-2. Every run of characters that is neither whitespace nor one of the 13 recognised combining accent marks (listed in the next step) collapses to a single space. This runs *before* the next step, so a character already present in the input — including a Chao tone letter — is ordinary text as far as this rule is concerned: it is never mistaken for a tone letter this function itself produced.
-3. Each recognised combining accent mark that survived step 2 is replaced by its Chao tone letters:
+1. The input is normalised to NFD, so accents are separate combining code points, then split into words on whitespace runs.
+2. Each word is walked one grapheme cluster at a time (`regex`'s `\X`), grouping clusters into **tone-bearing units**:
+   - A maximal run of **adjacent vowel** grapheme clusters is **one** unit (a diphthong is one syllable). The tone-bearing vowels are `a e i o u y ɨ ʉ ɯ ɪ ʏ ʊ ø ɘ ɵ ɤ ə ɛ œ ɜ ɞ ʌ ɔ æ ɐ ɶ ɑ ɒ ɚ ɝ`.
+   - A cluster carrying a **syllabic mark** (`U+0329`, `U+030D`) is **its own** unit — a syllabic consonant such as `m̩` is a syllable on its own and never joins a following vowel, even with no consonant after it.
+   - A **modifier letter** (Unicode category `Lm`, e.g. the length mark `ː`) is transparent: it neither starts a unit nor breaks a vowel run.
+   - Anything else (a consonant, punctuation, a digit) breaks a vowel run without starting a unit of its own.
+
+   A character already present in the input — including a Chao tone letter — that is none of the above is ordinary text as far as this rule is concerned: it is never mistaken for a tone letter this function itself produced.
+3. Each recognised combining accent mark carried by a unit is replaced by its Chao tone letters:
 
    | Code point | Example | Output |
    | --- | --- | --- |
@@ -33,10 +39,11 @@ Converter: `converters/chao_tones.py`. Takes and returns a plain string via `con
    | `U+1DC9` | o᷉ | `˦˨˦` |
 
    The contour values for `U+030C`, `U+0302`, `U+1DC4`, `U+1DC5` and `U+1DC8` are deliberately more internally consistent than the IPA chart's.
-4. Any three-space run collapses to two spaces, so a word gap stays wider than a within-word gap.
-5. Leading and trailing whitespace is stripped.
+4. A unit's tone letters (from step 3, in order) are concatenated, then adjacent identical tone letters in that concatenation collapse to one — a level tone spread across a diphthong is just that level tone (`kāī` → `˧`, not `˧˧`), while a contour distributed one letter per vowel does not collapse when its letters differ (`kàí` → `˨˦`, the same result as the same rising tone written on a single vowel, `kǎ` → `˨˦`). A unit with no accents contributes nothing.
+5. A word's non-empty unit groups are joined with one space; words that produced at least one group are joined with two spaces, so a word gap stays wider than a within-word gap. A word with no accents contributes nothing.
+6. Leading and trailing whitespace is stripped.
 
-Substitutions in step 3 are simultaneous, not sequential, so an output tone letter is never re-matched as input. Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in the input and not derived from any accent — e.g. a bare `˥` — collapses away in step 2 like any other non-accent character: `extract_chao_letters("˥")` → `""`.
+Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in the input and not derived from any accent — e.g. a bare `˥` — is ordinary text as far as step 2's unit walk is concerned, so it collapses away like any other non-vowel, non-syllabic character: `extract_chao_letters("˥")` → `""`.
 
 **Transform of `convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
 

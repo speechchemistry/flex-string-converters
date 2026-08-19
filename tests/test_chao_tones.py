@@ -70,6 +70,38 @@ def test_text_without_tone_marks_converts_to_empty_string(text):
     assert extract_chao_letters(text) == ""
 
 
+def test_level_tone_over_a_diphthong_is_one_collapsed_group():
+    # kāī: macron on both vowels of one syllable is one group, not two
+    assert extract_chao_letters("kāī") == "˧"
+
+
+def test_contour_spread_over_a_diphthong_is_one_group():
+    # kàí: grave then acute across one syllable's two vowels
+    assert extract_chao_letters("kàí") == "˨˦"
+
+
+def test_same_contour_on_one_vowel_matches_the_diphthong_spelling():
+    # kǎi and kàí notate the same rising tone over the same syllable; this
+    # pair is the point of grouping by syllable rather than by accent.
+    assert extract_chao_letters("kǎi") == "˨˦"
+
+
+def test_non_adjacent_duplicate_tone_letters_do_not_collapse():
+    # kǎǐ: caron on both vowels concatenates without collapsing, since no
+    # adjacent pair of tone letters repeats
+    assert extract_chao_letters("kǎǐ") == "˨˦˨˦"
+
+
+def test_syllabic_consonant_is_its_own_syllable_even_with_no_following_consonant():
+    # m̩̄ā: a syllabic nasal carrying its own tone is a syllable on its own,
+    # never joining the following vowel
+    assert extract_chao_letters("m̩̄ā") == "˧ ˧"
+
+
+def test_convert_diphthong_with_level_tone():
+    assert convert("kāī") == "kai ˧"
+
+
 def test_tone_letters_already_in_the_input_are_not_kept():
     # A tone letter that was already in the input, not derived from an
     # accent mark, is ordinary text as far as this function is concerned:
