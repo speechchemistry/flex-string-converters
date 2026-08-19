@@ -1,6 +1,6 @@
 # Per-syllable tone letters in `chao_tones.py`, then a reverse converter
 
-Status: drafted 2026-08-19, not yet approved, not implemented. Two changes, in this order; all
+Status: approved 2026-08-19. Change 1 implemented 2026-08-19; change 2 not yet implemented. Two changes, in this order; all
 decisions settled with the user. Supersedes the earlier reverse-only draft this file replaced (renamed
 from `chao-accents-reverse.md`), which assumed the forward converter would stay as it is.
 
@@ -297,3 +297,16 @@ clean diphthong path.
   eventually replace the bail-out is undecided, listing options 2 and 3 in a line each with their
   trade-off (spelling changes vs. stacked marks).
 - This plan keeps the full discussion, as the historical record of why option 1 was chosen.
+
+## Changes since approval
+
+- **2026-08-19, after change 1 landed:** the [Approval corpus](#approval-corpus) section's "no
+  diphthong fixture in either corpus for now" decision is relaxed for the forward corpus. Rather than
+  waiting indefinitely for an attested diphthong example, `AGENTS.md`'s Testing Approach now allows a
+  linguistically plausible *constructed* fixture when no real one is at hand, provided the filename
+  says so (a `_simulated` suffix) — the fixture has no comment lines to carry that label, so the
+  filename is the only place it can live. `tests/fixtures/chao_tones/inputs/diphthongs_simulated.txt`
+  was added on this basis, covering the same rules as the diphthong unit tests
+  (level-tone collapsing, contour distribution, and convergence with the single-vowel spelling) with
+  different words, so it doesn't duplicate them. The reverse corpus's diphthong gap (change 2, not yet
+  built) is unaffected by this note and can use the same allowance when it's implemented.

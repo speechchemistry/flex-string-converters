@@ -18,7 +18,10 @@ the conventions this procedure follows, and `tests/test_chao_tones_cli.py` with
    fixture directory (e.g. `tests/fixtures/chao_tones/`).
 2. Write the input as a plain `.txt` file under that converter's `inputs/` directory, one line of
    real input per line. Do not add comment lines or labels — the filename is the label, and every
-   line must be real input the converter will actually see.
+   line must be real input the converter will actually see. Prefer attested real-world examples;
+   when none exist yet, a linguistically plausible constructed example is fine, but name the file to
+   say so (e.g. a `_simulated` suffix) — see [AGENTS.md's Testing Approach
+   section](../../../AGENTS.md#testing-approach).
 3. Take care with anything invisible or fragile in the file:
    - Keep whitespace-sensitive content *internal* to a line, never trailing — editors and review
      tooling routinely strip trailing whitespace.
