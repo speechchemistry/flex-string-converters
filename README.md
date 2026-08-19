@@ -49,8 +49,9 @@ A starting point for a new module: copy it to a name without the leading `__`, p
 
 1. Add `converters/<what_it_converts>.py` with a `convert(input_string)` function and a command line interface, and no `flextoolslib` or FieldWorks import.
 2. Add `tests/test_<what_it_converts>.py` covering `convert()` directly.
-3. If it should run over a whole lexicon, copy `__Template_converter_module.py` to a module file at the repository root.
-4. Update [SPEC.md](SPEC.md) and this README in the same change.
+3. Once the CLI has realistic or awkward-to-assert-inline output, add approval fixtures under `tests/fixtures/<what_it_converts>/` — see [Approval testing](#approval-testing) below.
+4. If it should run over a whole lexicon, copy `__Template_converter_module.py` to a module file at the repository root.
+5. Update [SPEC.md](SPEC.md) and this README in the same change.
 
 See [AGENTS.md](AGENTS.md) for the full contributor conventions and [SPEC.md](SPEC.md) for what each converter and module guarantees.
 
@@ -61,6 +62,18 @@ python -m pytest
 ```
 
 from the repository root. The converter tests run on any platform; so do the module tests, which stub `flextoolslib` and drive `MainFunction` with a fake project.
+
+### Approval testing
+
+`chao_tones.py`'s CLI is covered end to end by an approval-testing suite, following the same Emily Bache workflow used by the sibling [audio_label_file_conversions](https://github.com/speechchemistry/audio_label_file_conversions) and [lexicon_file_conversions](https://github.com/speechchemistry/lexicon_file_conversions) repositories:
+
+- Input fixtures are in `tests/fixtures/chao_tones/inputs/*.txt`.
+- Approved outputs are in `tests/fixtures/chao_tones/approved/*.approved.txt`.
+- On a mismatch — or on a brand new fixture that has no approved output yet — the proposed output is written to `tests/fixtures/chao_tones/received/*.received.txt`, and the test failure prints the exact command to promote it.
+
+Unlike the EAF/XML fixtures in those sibling repos, comparison here is exact: no scrubbing and no Unicode normalisation, since NFC/NFD handling is itself part of what `convert()` guarantees.
+
+To add a fixture or approve a changed one: drop or edit a `.txt` file under `inputs/`, run the tests, **read** the resulting `.received.txt` file, and only once it looks correct, run the `cp` command the failure prints to promote it into `approved/`. See the [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) skill for the full procedure.
 
 ## Related
 

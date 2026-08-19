@@ -45,7 +45,7 @@ The directory name is Claude Code's (it discovers skills only there), but the fi
 
 Skills in this repository:
 
-- _(none yet)_
+- [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) — add a new approval-test fixture (or approve a changed one) for a converter's CLI output.
 
 ## Plans
 
@@ -120,8 +120,11 @@ Module files are the thin FlexTools wrapper around a converter; they are loaded 
 - `flextoolslib` only installs on Windows alongside FieldWorks, so importing a module file fails elsewhere at its top-level `from flextoolslib import *`. `tests/conftest.py` stubs `flextoolslib` in `sys.modules` and loads module files by path, so `MainFunction` can be driven with fake `project` and `report` objects on any platform.
 - Those fakes cover the module's decisions, not FLEx itself, so still verify a changed module by running it in FlexTools with modification disabled before enabling it.
 - Prefer small parametrized assertions while a converter's output is short strings. Switch to approval testing when output becomes large or awkward to assert inline: the checked-in artifact is the approved one, a mismatch produces a received artifact for review, and changes are never auto-accepted without explicit confirmation.
+- **Approval testing convention** (see `tests/test_chao_tones_cli.py` and `tests/fixtures/chao_tones/` for the worked example): input fixtures live in `tests/fixtures/<converter>/inputs/*.txt`, approved outputs in `tests/fixtures/<converter>/approved/<stem>.approved.txt`, and a mismatch (or a fixture with no approved file yet) is written to `tests/fixtures/<converter>/received/<stem>.received.txt`. Adding a fixture and approving a changed one are the same loop: drop or edit a `.txt` in `inputs/`, run `python -m pytest`, read the failure's received file, and — only once it looks right — promote it with the `cp` command the failure prints. Never write into `approved/` any other way.
+- For a converter whose output is plain text, compare the approved file and the actual output **exactly**: no scrubbing, no Unicode normalisation, and no comment or label lines inside a fixture (the filename is the label). Normalising would hide a real regression whenever normalisation is itself part of what the converter guarantees, as NFC/NFD handling is for `chao_tones.py`.
+- A few traps that make an approval suite look green while testing nothing, worth checking for in review: a fixture with no approved counterpart must fail loudly rather than being skipped or silently passing; `*.received.*` must stay gitignored so a received file can never be committed as though it were approved; drive a CLI subprocess with an explicit `encoding="utf-8"` rather than `text=True`, since the locale code page can mangle non-ASCII output; and an editor can silently strip trailing whitespace or re-normalise Unicode in a fixture file, corrupting an exact comparison — keep whitespace and normalisation-sensitive cases away from line ends.
 - Keep approved artifacts human-reviewable and deterministic so diffs are meaningful.
-- Follow TDD for behaviour changes: add or extend the test and confirm it fails first (red), write the minimum implementation to make it pass (green), then refactor with the tests as a safety net.
+- Follow TDD for behaviour changes: add or extend the test and confirm it fails first (red), write the minimum implementation to make it pass (green), then refactor with the tests as a safety net. For an approval test this means adding the fixture first and confirming the received output is wrong before implementing, then promoting the received file once it's right — the same reason a first approval must be read, never accepted on trust.
 
 ## Documentation
 
