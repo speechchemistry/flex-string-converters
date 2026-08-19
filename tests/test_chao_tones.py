@@ -44,14 +44,15 @@ def test_spec_example():
 
 
 def test_precomposed_input_matches_decomposed():
-    precomposed = unicodedata.normalize("NFC", "ǹ")
-    decomposed = unicodedata.normalize("NFD", "ǹ")
+    precomposed = unicodedata.normalize("NFC", "mí")
+    decomposed = unicodedata.normalize("NFD", "mí")
     assert precomposed != decomposed          # guard: the two forms really differ
-    assert extract_chao_letters(precomposed) == extract_chao_letters(decomposed) == "˨"
+    assert extract_chao_letters(precomposed) == extract_chao_letters(decomposed) == "˦"
 
 
 def test_several_accents_in_one_word_keep_their_order():
-    assert extract_chao_letters("ńj̀") == "˦ ˨"
+    # sākpò "adult" (a Northwestern Plateau language): mid tone on the first vowel, low on the second
+    assert extract_chao_letters("sākpò") == "˧ ˨"
 
 
 def test_words_are_separated_by_two_spaces():

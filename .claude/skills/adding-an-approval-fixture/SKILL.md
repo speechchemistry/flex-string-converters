@@ -36,6 +36,12 @@ the conventions this procedure follows, and `tests/test_chao_tones_cli.py` with
 6. If it's correct, run the promote command from the failure message. Do not write or copy the
    approved file any other way — it must be produced by this loop, never hand-crafted.
 7. Re-run `python -m pytest` and confirm it's green and the received file is gone.
+8. Check the new example isn't a duplicate. If it's illustrating a rule that already has a general
+   unit test in `tests/test_<name>.py` (e.g. "an unrelated diacritic survives in the base text"), it
+   belongs *only* in the fixture — don't also add a unit test asserting the identical input/output
+   pair the fixture now checks. See [AGENTS.md's Testing Approach
+   section](../../../AGENTS.md#testing-approach) for why: the two layers are meant to cover different
+   ground, not mirror each other.
 
 ## Approving a changed fixture
 
