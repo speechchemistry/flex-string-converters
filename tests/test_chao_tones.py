@@ -69,8 +69,12 @@ def test_text_without_tone_marks_converts_to_empty_string(text):
     assert extract_chao_letters(text) == ""
 
 
-def test_tone_letters_already_in_the_input_are_kept():
-    assert extract_chao_letters("˥") == "˥"
+def test_tone_letters_already_in_the_input_are_not_kept():
+    # A tone letter that was already in the input, not derived from an
+    # accent mark, is ordinary text as far as this function is concerned:
+    # it collapses away like any other non-accent character rather than
+    # being kept alongside (and indistinguishable from) an extracted one.
+    assert extract_chao_letters("˥") == ""
 
 
 # ---------------------------------------------------------------
@@ -88,6 +92,14 @@ def test_convert_text_with_no_tone_accents_is_returned_unchanged():
 def test_convert_leaves_unrelated_diacritics_in_the_base_text():
     # U+0308 (diaeresis, as in ë) is not one of the 13 recognised tone accents
     assert convert("ë") == "ë"
+
+
+def test_convert_does_not_duplicate_a_tone_letter_already_in_the_input():
+    # convert()'s base text keeps a tone letter unchanged (it's not one of
+    # the 13 tone-accent marks base_text strips), and extract_chao_letters()
+    # must not also treat it as something it extracted, or it would appear
+    # twice.
+    assert convert("˥") == "˥"
 
 
 def test_convert_empty_string():

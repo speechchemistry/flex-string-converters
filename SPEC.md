@@ -13,7 +13,8 @@ Converter: `converters/chao_tones.py`. Takes and returns a plain string via `con
 **Transform of `extract_chao_letters()`.**
 
 1. The input is normalised to NFD, so accents are separate combining code points.
-2. Each recognised combining accent is replaced by its Chao tone letters:
+2. Every run of characters that is neither whitespace nor one of the 13 recognised combining accent marks (listed in the next step) collapses to a single space. This runs *before* the next step, so a character already present in the input — including a Chao tone letter — is ordinary text as far as this rule is concerned: it is never mistaken for a tone letter this function itself produced.
+3. Each recognised combining accent mark that survived step 2 is replaced by its Chao tone letters:
 
    | Code point | Example | Output |
    | --- | --- | --- |
@@ -32,11 +33,10 @@ Converter: `converters/chao_tones.py`. Takes and returns a plain string via `con
    | `U+1DC9` | o᷉ | `˦˨˦` |
 
    The contour values for `U+030C`, `U+0302`, `U+1DC4`, `U+1DC5` and `U+1DC8` are deliberately more internally consistent than the IPA chart's.
-3. Every run of characters that is neither whitespace nor a tone letter collapses to a single space.
 4. Any three-space run collapses to two spaces, so a word gap stays wider than a within-word gap.
 5. Leading and trailing whitespace is stripped.
 
-Substitutions in step 2 are simultaneous, not sequential, so an output tone letter is never re-matched as input. Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`.
+Substitutions in step 3 are simultaneous, not sequential, so an output tone letter is never re-matched as input. Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in the input and not derived from any accent — e.g. a bare `˥` — collapses away in step 2 like any other non-accent character: `extract_chao_letters("˥")` → `""`.
 
 **Transform of `convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
 

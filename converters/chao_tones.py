@@ -52,14 +52,20 @@ TONE_ACCENT_MARKS = frozenset(mark for mark, _ in ACCENT_TO_TONE_LETTERS)
 def extract_chao_letters(input_string):
     # ensure string is decomposed into separate code points
     input_decomposed = unicodedata.normalize('NFD',input_string)
+    # find any run of items that aren't a space or a recognised accent mark
+    # and replace it with a space, BEFORE substituting accents for tone
+    # letters. Filtering first, rather than filtering by tone letter after
+    # substitution, means a Chao tone letter already present in the input is
+    # ordinary text as far as this function is concerned: it collapses away
+    # like any other character instead of being indistinguishable from (and
+    # so kept alongside) a tone letter this function actually extracted.
+    non_accent_run = '[^\\s' + ''.join(regex.escape(mark) for mark in TONE_ACCENT_MARKS) + ']+'
+    accents_in_spaces = regex.sub(non_accent_run,' ',input_decomposed)
     # replace all possible accents with chao tone letters
-    chao_in_text = multisub(ACCENT_TO_TONE_LETTERS, input_decomposed)
-    # find any run of items that aren't a space or tone letter and replace it with a space
-    # the six characters in the first part were suggested by ChatGPT
-    chao_in_spaces = regex.sub(r'[^\s˥˦˧˨˩]+',' ',chao_in_text)
+    chao_in_text = multisub(ACCENT_TO_TONE_LETTERS, accents_in_spaces)
     # convert any three space runs between words to two space runs
     # (three spaces occur after any codas and before another word)
-    chao_two_space_gaps = regex.sub(r'   ','  ',chao_in_spaces)
+    chao_two_space_gaps = regex.sub(r'   ','  ',chao_in_text)
     # then just remove any initial whitespace
     no_leading_spaces = regex.sub(r'^\s+','',chao_two_space_gaps)
     # remove any leading whitespace
