@@ -3,7 +3,8 @@
 #
 #   Chao tone letters from accent notation
 #
-#   Extracts Chao tone letters (only) from any accent notation. Shared by the
+#   Returns the input with tone-accent diacritics stripped, followed by the
+#   Chao tone letters extracted from that accent notation. Shared by the
 #   FlexTools module Extract_Chao_tone_letters_from_accent_notation.py, usable
 #   as an SIL Flex Process, and runnable as the command line tool below.
 #
@@ -29,24 +30,30 @@ def multisub(subs, subject):
     replace = lambda m: substs[m.lastindex - 1]
     return re.sub(pattern, replace, subject)
 
-def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+# The 13 recognised tone-accent combining marks and the Chao tone letters
+# each maps to. Both extract_chao_letters() and convert() derive from this
+# one list, so the codepoint set is never duplicated.
+ACCENT_TO_TONE_LETTERS = [('\u030B','˥'), # ő
+                   ('\u0301','˦'), # ó
+                   ('\u0304','˧'), # ō
+                   ('\u0300','˨'), # ò
+                   ('\u030F','˩'), # ȍ
+                   ('\u030C','˨˦'), # ǒ trying to be more consistent than IPA chart
+                   ('\u0302','˦˨'), # ô trying to be more consistent than IPA chart
+                   ('\u1DC4','˧˦'), # o᷄ trying to be more consistent than IPA chart
+                   ('\u1DC5','˨˧'), # o᷅ trying to be more consistent than IPA chart
+                   ('\u1DC8','˨˦˨'), # o᷈ trying to be more consistent than IPA chart
+                   ('\u1DC6','˧˨'), # o᷆
+                   ('\u1DC7','˦˧'), # o᷇
+                   ('\u1DC9','˦˨˦')] # o᷉
+
+TONE_ACCENT_MARKS = frozenset(mark for mark, _ in ACCENT_TO_TONE_LETTERS)
+
+def extract_chao_letters(input_string):
     # ensure string is decomposed into separate code points
     input_decomposed = unicodedata.normalize('NFD',input_string)
     # replace all possible accents with chao tone letters
-    chao_in_text = multisub([('\u030B','˥'), # ő
-                       ('\u0301','˦'), # ó
-                       ('\u0304','˧'), # ō
-                       ('\u0300','˨'), # ò
-                       ('\u030F','˩'), # ȍ
-                       ('\u030C','˨˦'), # ǒ trying to be more consistent than IPA chart
-                       ('\u0302','˦˨'), # ô trying to be more consistent than IPA chart
-                       ('\u1DC4','˧˦'), # o᷄ trying to be more consistent than IPA chart
-                       ('\u1DC5','˨˧'), # o᷅ trying to be more consistent than IPA chart
-                       ('\u1DC8','˨˦˨'), # o᷈ trying to be more consistent than IPA chart
-                       ('\u1DC6','˧˨'), # o᷆
-                       ('\u1DC7','˦˧'), # o᷇
-                       ('\u1DC9','˦˨˦')], # o᷉
-                       input_decomposed)
+    chao_in_text = multisub(ACCENT_TO_TONE_LETTERS, input_decomposed)
     # find any run of items that aren't a space or tone letter and replace it with a space
     # the six characters in the first part were suggested by ChatGPT
     chao_in_spaces = regex.sub(r'[^\s˥˦˧˨˩]+',' ',chao_in_text)
@@ -59,15 +66,28 @@ def convert(input_string): # function is named "convert" so it can be used as an
     output = regex.sub(r'\s+$','',no_leading_spaces)
     return output
 
+def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+    # ensure string is decomposed into separate code points, so tone-accent
+    # marks can be removed individually without disturbing other diacritics
+    input_decomposed = unicodedata.normalize('NFD',input_string)
+    base_decomposed = ''.join(
+        ch for ch in input_decomposed if ch not in TONE_ACCENT_MARKS)
+    # recompose so unrelated combining marks combine normally
+    base_text = unicodedata.normalize('NFC',base_decomposed)
+    tone_letters = extract_chao_letters(input_string)
+    if not tone_letters:
+        return base_text
+    return f"{base_text} {tone_letters}"
+
 
 #----------------------------------------------------------------
 # Command line interface
 
 def parse_arguments():
-    """Extracts Chao tone letters (only) from any accent notation"""
+    """Strips tone-accent notation to base text and appends its Chao tone letters"""
     parser = argparse.ArgumentParser(
-        description="Extract Chao tone letters (only) from any accent "
-                    "notation, e.g. nə̀jɛ᷅t -> ˨ ˨˧.")
+        description="Strip tone-accent notation to base text and append its "
+                    "Chao tone letters, e.g. nə̀jɛ᷅t -> nəjɛt ˨ ˨˧.")
     parser.add_argument("text", nargs="*",
                         help="the text to convert; with no text given, lines "
                              "are read from standard input instead")

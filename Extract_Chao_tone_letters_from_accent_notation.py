@@ -24,19 +24,20 @@ from chao_tones import convert
 # Documentation for the user:
 
 docs = {FTM_Name       : "Extract Chao tone letters from accent notation and put in pitch field",
-        FTM_Version    : 0.7,
+        FTM_Version    : 0.8,
         FTM_ModifiesDB : True,
         FTM_Synopsis   : "Extracts Chao tone letters (only) from any accent notation",
         FTM_Help       : None,
         FTM_Description:
 """
-Goes through all the lexeme forms and extracts Chao tone letters (only)
-from any accent notation and puts it into a Custom Pitch field. You can use
-Bulk Edit Entries in Flex to move these to the desired field.
+Goes through all the lexeme forms and puts the spelled form (with tone-accent
+marks stripped), followed by its Chao tone letters when it has any, into a
+Custom Pitch field. You can use Bulk Edit Entries in Flex to move these to
+the desired field.
 
-Re-running replaces the Pitch value rather than adding to it. Entries whose
-lexeme form has no tone marks are left alone, so a Pitch value entered by hand
-is never cleared.
+Re-running replaces the Pitch value rather than adding to it. Only an entry
+with a genuinely blank lexeme form is left alone; every other entry has its
+Pitch value overwritten, including a Pitch value entered by hand.
 """ }
 
 #----------------------------------------------------------------
@@ -133,7 +134,7 @@ def MainFunction(project, report, modifyAllowed):
     # Say what was written as well as what was skipped: a large skipped count
     # on its own reads as though nothing was converted
     report.Info("%s%s Pitch for %d of %d entries; left %d unchanged "
-                "(no tone marks found)"
+                "(empty lexeme form)"
                 % (dryRun,
                    "Wrote" if AddReportToField else "Would write",
                    converted, numberEntries, unchanged))

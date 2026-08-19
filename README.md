@@ -10,17 +10,17 @@ These modules are in development. **Please back up your FLEx project before runn
 
 ### `converters/chao_tones.py`
 
-Extracts Chao tone letters (only) from accent notation. For example `nə̀jɛ᷅t` → `˨ ˨˧`.
+`convert()` strips tone-accent diacritics from the input and appends its Chao tone letters. For example `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. The tone-letters-only extraction is also available on its own as `extract_chao_letters()`, e.g. `nə̀jɛ᷅t` → `˨ ˨˧`.
 
 Run it on its own to convert text given as arguments, or lines read from standard input:
 
 ```
 $ echo 'nə̀jɛ᷅t' | python3 converters/chao_tones.py
-˨ ˨˧
+nəjɛt ˨ ˨˧
 
 $ python3 converters/chao_tones.py 'nə̀jɛ᷅t' 'ǒlō'
-˨ ˨˧
-˨˦ ˧
+nəjɛt ˨ ˨˧
+olo ˨˦ ˧
 ```
 
 It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required.
@@ -33,9 +33,9 @@ To install, copy this whole folder into your FlexTools `Modules` folder, keeping
 
 ### `Extract_Chao_tone_letters_from_accent_notation.py`
 
-Goes through all the lexeme forms, runs `converters/chao_tones.py` over each one, and puts the result into a custom `Pitch` field. You can use Bulk Edit Entries in FLEx to move these to the desired field.
+Goes through all the lexeme forms, runs `converters/chao_tones.py`'s `convert()` over each one, and puts the result — the spelled form with tone-accent marks stripped, plus its Chao tone letters when it has any — into a custom `Pitch` field. You can use Bulk Edit Entries in FLEx to move these to the desired field.
 
-Running it again replaces the `Pitch` value rather than adding to it, so a second run over the same entries leaves the same result as the first. Entries whose lexeme form has no tone marks are left alone, so a `Pitch` value you typed in yourself is never cleared.
+Running it again replaces the `Pitch` value rather than adding to it, so a second run over the same entries leaves the same result as the first. Only entries with a genuinely blank lexeme form are left alone — every other entry has its `Pitch` value overwritten, including a `Pitch` value you typed in yourself, if its lexeme form has no tone marks. **Back up your project first** (see above): this module no longer protects hand-entered `Pitch` values on entries that carry no tone marks.
 
 It requires that you set the source lexeme field writing system as the default vernacular language. To do this in FLEx use the menu item Format > Set up vernacular writing systems… then ensure that the writing system in the top right is the desired one (using the up and down arrow buttons). It also requires that you create an entry level custom field called "Pitch" (Tools > Configure > Custom Fields…).
 

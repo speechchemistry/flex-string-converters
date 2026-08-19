@@ -1,6 +1,6 @@
 # Add base text to `chao_tones.py`'s `convert()`
 
-Status: proposed 2026-08-19, not yet implemented.
+Status: proposed 2026-08-19, implemented 2026-08-19.
 
 ## Context
 

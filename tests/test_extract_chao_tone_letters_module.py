@@ -102,7 +102,7 @@ def test_dry_run_writes_nothing(chao_module):
 
     assert project.writes == []
     # ...but the conversions are still reported, so a preview stays useful
-    assert "nə̀jɛ᷅t -> ˨ ˨˧" in report.text
+    assert "nə̀jɛ᷅t -> nəjɛt ˨ ˨˧" in report.text
     # and the run says plainly that it wrote nothing
     assert "[DRY RUN] Writing Pitch in the %s writing system" % VERN_WS_NAME in report.text
     assert "[DRY RUN] Would write Pitch for 2 of 2 entries" in report.text
@@ -113,7 +113,7 @@ def test_writes_converted_text_in_the_vernacular_writing_system(chao_module):
 
     run(chao_module, project, modifyAllowed=True)
 
-    assert project.writes == [(0, PITCH_FIELD, "˨ ˨˧", VERN_WS)]
+    assert project.writes == [(0, PITCH_FIELD, "nəjɛt ˨ ˨˧", VERN_WS)]
 
 
 def test_does_not_use_the_broken_add_tag_helper(chao_module):
@@ -126,16 +126,17 @@ def test_does_not_use_the_broken_add_tag_helper(chao_module):
     assert project.tagCalls == []
 
 
-def test_entries_without_tone_marks_are_left_alone(chao_module):
+def test_entries_with_a_blank_lexeme_form_are_left_alone(chao_module):
     # Overwriting with an empty string would wipe a Pitch value entered by hand
     project = FakeProject(["cat", "nə̀jɛ᷅t", ""])
 
     report = run(chao_module, project, modifyAllowed=True)
 
-    assert project.writes == [(1, PITCH_FIELD, "˨ ˨˧", VERN_WS)]
+    assert project.writes == [(0, PITCH_FIELD, "cat", VERN_WS),
+                               (1, PITCH_FIELD, "nəjɛt ˨ ˨˧", VERN_WS)]
     # the summary has to say what *was* written, not only what was skipped
-    assert "Wrote Pitch for 1 of 3 entries" in report.text
-    assert "left 2 unchanged (no tone marks found)" in report.text
+    assert "Wrote Pitch for 2 of 3 entries" in report.text
+    assert "left 1 unchanged (empty lexeme form)" in report.text
 
 
 def test_missing_pitch_field_reports_an_error_and_writes_nothing(chao_module):
@@ -146,7 +147,7 @@ def test_missing_pitch_field_reports_an_error_and_writes_nothing(chao_module):
     assert report.errors == ["The entry-level Pitch field is missing"]
     assert project.writes == []
     # degraded to read-only, not aborted: conversions are still reported
-    assert "nə̀jɛ᷅t -> ˨ ˨˧" in report.text
+    assert "nə̀jɛ᷅t -> nəjɛt ˨ ˨˧" in report.text
 
 
 def test_reports_the_writing_system_it_writes_to(chao_module):
@@ -188,7 +189,7 @@ def test_field_type_is_unknown_when_the_helpers_are_missing(chao_module):
 
     assert "The type of the Pitch field could not be determined" in report.text
     # a missing diagnostic must not stop the real work
-    assert project.writes == [(0, PITCH_FIELD, "˨ ˨˧", VERN_WS)]
+    assert project.writes == [(0, PITCH_FIELD, "nəjɛt ˨ ˨˧", VERN_WS)]
 
 
 def test_progress_is_reported_over_all_entries(chao_module):

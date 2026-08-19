@@ -10,7 +10,7 @@ Each converter is specified first, since the converter is the product and runs t
 
 Converter: `converters/chao_tones.py`. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency, so the rules below hold whether it is called from FlexTools, from the command line, or as a FLEx Process.
 
-**Transform.**
+**Transform of `extract_chao_letters()`.**
 
 1. The input is normalised to NFD, so accents are separate combining code points.
 2. Each recognised combining accent is replaced by its Chao tone letters:
@@ -38,6 +38,15 @@ Converter: `converters/chao_tones.py`. Takes and returns a plain string via `con
 
 Substitutions in step 2 are simultaneous, not sequential, so an output tone letter is never re-matched as input. Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`.
 
+**Transform of `convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
+
+1. The input is normalised to NFD.
+2. A `base_text` is built by removing only the 13 tone-accent combining marks listed above from the decomposed form, then normalising the result back to NFC. Other diacritics and all whitespace are left exactly as in the input.
+3. `extract_chao_letters()` is run over the original input, exactly as specified above.
+4. The result is `base_text` alone when `extract_chao_letters()`'s result is empty, otherwise `base_text` + one space + that result.
+
+Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
+
 **Command line.** Text given as arguments is converted one result per line, in the order given. With no arguments the converter reads standard input line by line and writes one converted line per input line, so it works as a filter in a pipeline. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
 
 **Dependencies.** Python 3 and the `regex` package.
@@ -48,16 +57,16 @@ Module: `Extract_Chao_tone_letters_from_accent_notation.py`, wrapping the conver
 
 **Reads.** The lexeme form of every entry, via `LexiconGetLexemeForm(entry)`. The lexeme form is read in the project's default vernacular writing system, so that writing system must be the one holding the accent notation.
 
-**Transform.** `convert()` from `converters/chao_tones.py`, exactly as specified above. The module adds no rules of its own.
+**Transform.** `convert()` from `converters/chao_tones.py`, exactly as specified above — the lexeme form with tone accents stripped, plus tone letters when the lexeme form has any. The module adds no rules of its own.
 
 **Writes.** The entry-level custom field named `Pitch`, via `LexiconSetFieldText(entry, flagsField, chao_letters, ws)`, and only when `modifyAllowed` is true.
 
 - The value **replaces** whatever the field held, so running the module twice over the same entries leaves the same result as running it once.
-- Entries whose converted result is the empty string are **left untouched**, so a `Pitch` value entered by hand is never cleared by a lexeme form that carries no tone marks. The consequence is that removing the tone marks from a lexeme form leaves the previous `Pitch` value in place.
+- `Pitch` is overwritten with `convert()`'s result for every entry with a non-empty lexeme form — the spelled form alone when it has no tone marks, spelled form plus tone letters when it does. Only a genuinely blank lexeme form is left untouched. A `Pitch` value entered by hand is therefore **not** protected on entries whose lexeme form lacks tone marks: it is overwritten with the spelled form.
 - `ws` is the project's default vernacular writing system — the same one the lexeme form is read from — unless the module's `PITCH_WS` constant names another. It is always passed explicitly, because `LexiconSetFieldText` otherwise defaults to the default *analysis* writing system, which would store text that a vernacular field never displays.
 - `LexiconAddTagToField` is deliberately not used: it reads the field back without a writing system, which raises `AttributeError` on a multi-string custom field.
 
-**Reporting.** The type of the `Pitch` field and the writing system being written to (that line prefixed with `[DRY RUN] ` when `modifyAllowed` is false), then an entry count, then a progress bar over all entries (`report.ProgressStart` / `report.ProgressUpdate`), then one `report.Info` line per entry showing `<lexeme form> -> <tone letters>`, then a final `Wrote Pitch for <n> of <total> entries; left <m> unchanged (no tone marks found)` summary (`Would write` and the `[DRY RUN] ` prefix when `modifyAllowed` is false).
+**Reporting.** The type of the `Pitch` field and the writing system being written to (that line prefixed with `[DRY RUN] ` when `modifyAllowed` is false), then an entry count, then a progress bar over all entries (`report.ProgressStart` / `report.ProgressUpdate`), then one `report.Info` line per entry showing `<lexeme form> -> <convert() result>`, then a final `Wrote Pitch for <n> of <total> entries; left <m> unchanged (empty lexeme form)` summary (`Would write` and the `[DRY RUN] ` prefix when `modifyAllowed` is false).
 
 The `Pitch` field's type is reported using `LexiconFieldIsStringType` and `LexiconFieldIsAnyStringType`. `LexiconFieldIsMultiType` is deliberately not used: in flexlibs 1.2.8 and flexlibs2 2.3.1 it reads `FLExLCM.CellarMultiTypes`, a name `FLExLCM` never defines, so it raises `AttributeError` for every field.
 
