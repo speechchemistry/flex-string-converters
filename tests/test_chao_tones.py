@@ -51,7 +51,7 @@ def test_precomposed_input_matches_decomposed():
 
 
 def test_several_accents_in_one_word_keep_their_order():
-    # sākpò "adult" (a Northwestern Plateau language): mid tone on the first vowel, low on the second
+    # sākpò "adult" (a Plateau language): mid tone on the first vowel, low on the second
     assert extract_chao_letters("sākpò") == "˧ ˨"
 
 
