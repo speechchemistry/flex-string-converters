@@ -43,7 +43,7 @@ The `Pitch` field should show that same default vernacular writing system, becau
 
 ### `__Template_converter_module.py`
 
-A starting point for a new module: copy it to a name without the leading `__`, point it at your converter, and change the marked places.
+A starting point for a new module: copy it to a name without the leading `__`, point it at your converter, and change the marked places. It reads the lexeme form of every entry and reports what your converter would produce; it writes nothing and needs no custom field, so a fresh copy runs immediately against any project. Writing the result back into a field is a commented-out block below `MainFunction` that you uncomment once the read-only report looks right — see `Extract_Chao_tone_letters_from_accent_notation.py` above for the worked example.
 
 ## Writing a new converter
 

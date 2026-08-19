@@ -2,9 +2,15 @@
 #
 #   Template converter module
 #
-#   A starting point for a FlexTools module that runs one converter over a
-#   field of every entry. Copy it to <What_it_does>.py, change the marked
+#   A starting point for a FlexTools module that runs one converter over the
+#   lexeme form of every entry and reports what it would produce. It writes
+#   nothing and needs no custom field, so a fresh copy runs immediately
+#   against any project. Copy it to <What_it_does>.py, change the marked
 #   places, and delete this paragraph.
+#
+#   To write the result back into a custom field, see the "Writing the result
+#   back" block below MainFunction and the worked example in
+#   Extract_Chao_tone_letters_from_accent_notation.py.
 #
 #   The leading __ keeps FlexTools from importing this file as a module of its
 #   own: the scanner skips __-prefixed files before importing them. Copies must
@@ -23,42 +29,22 @@ from flextoolslib import *
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "converters"))
-from my_converter import convert        # <- your converters/my_converter.py
+# replace my_converter with your converter's module name e.g. from chao_tones import convert
+from my_converter import convert
 
 #----------------------------------------------------------------
 # Documentation for the user:
 
 docs = {FTM_Name       : "<What the module does>",
         FTM_Version    : 0.1,
-        FTM_ModifiesDB : True,
+        FTM_ModifiesDB : False,
         FTM_Synopsis   : "<One line shown in the module list>",
         FTM_Help       : None,
         FTM_Description:
 """
-<What the module does, what it reads, what it writes, and what re-running it
-does. Say plainly whether a second run replaces or accumulates.>
+<What the module does.> Reports what <your converter> would produce for the
+lexeme form of every entry. Writes nothing.
 """ }
-
-#----------------------------------------------------------------
-# Configuration
-
-TARGET_FIELD_NAME = "<Custom field to write>"
-
-# LexiconSetFieldText defaults to the analysis writing system, which would
-# store text that a vernacular field never displays. None means the project's
-# default vernacular writing system, which is also the one the lexeme form is
-# read from; set a language tag here for a field that uses another one.
-TARGET_WS = None
-
-
-def targetWritingSystem(project):
-    """
-    Returns the (language tag, name) of the writing system to write in.
-    """
-    if TARGET_WS is None:
-        return project.GetDefaultVernacularWS()
-    return (TARGET_WS, TARGET_WS)
-
 
 #----------------------------------------------------------------
 # The main processing function
@@ -66,49 +52,81 @@ def targetWritingSystem(project):
 def MainFunction(project, report, modifyAllowed):
     """
     This is the main processing function.
-    """
-    writeAllowed = modifyAllowed
-    targetField = project.LexiconGetEntryCustomFieldNamed(TARGET_FIELD_NAME)
-    if writeAllowed and not targetField:
-        report.Error("The entry-level %s field is missing" % TARGET_FIELD_NAME)
-        # Degrade to read-only rather than raising, so the run still reports
-        writeAllowed = False
 
-    # Report the writing system: writing to the wrong one stores text that the
-    # field never displays, which otherwise looks exactly like doing nothing
-    targetWS, targetWSName = targetWritingSystem(project)
-    dryRun = "" if writeAllowed else "[DRY RUN] "
-    report.Info("%sWriting %s in the %s writing system"
-                % (dryRun, TARGET_FIELD_NAME, targetWSName))
+    Read-only: modifyAllowed is unused because nothing is written.
+    """
+    # Report the writing system the lexeme forms are read from: a lexeme form
+    # in the wrong writing system is the failure that looks most like a no-op
+    vernWS, vernWSName = project.GetDefaultVernacularWS()
+    report.Info("Reading lexeme forms in the %s writing system" % vernWSName)
 
     numberEntries = project.LexiconNumberOfEntries()
     report.Info("Lexicon contains %d entries" % numberEntries)
     report.ProgressStart(numberEntries)
 
     converted = 0
-    unchanged = 0
     for entryNumber, entry in enumerate(project.LexiconAllEntries()):
         report.ProgressUpdate(entryNumber)
         source = project.LexiconGetLexemeForm(entry)
         result = convert(source)
         report.Info(source + " -> " + result)
-        if not result:
-            # Writing an empty result would clear a value entered by hand
-            unchanged += 1
-            continue
-        converted += 1
-        if writeAllowed:
-            # LexiconSetFieldText, not LexiconAddTagToField: the latter reads
-            # the field back with no writing system, which raises
-            # AttributeError on a multi-string custom field
-            project.LexiconSetFieldText(entry, targetField, result, targetWS)
+        if result:
+            converted += 1
 
-    # Say what was written as well as what was skipped: a large skipped count
-    # on its own reads as though nothing was converted
-    report.Info("%s%s %s for %d of %d entries; left %d unchanged"
-                % (dryRun,
-                   "Wrote" if writeAllowed else "Would write",
-                   TARGET_FIELD_NAME, converted, numberEntries, unchanged))
+    report.Info("Would produce a result for %d of %d entries"
+                % (converted, numberEntries))
+
+#----------------------------------------------------------------
+# Writing the result back
+#
+# Uncomment and adapt this once the read-only report above looks right. See
+# Extract_Chao_tone_letters_from_accent_notation.py for the full worked
+# example. Three traps to know about, since each one fails silently:
+#
+# - LexiconSetFieldText defaults to the default *analysis* writing system, so
+#   pass the writing system explicitly or the text lands where a vernacular
+#   field never displays it.
+# - LexiconAddTagToField reads the field back with no writing system and
+#   raises AttributeError on a multi-string custom field, so don't use it.
+# - Skip empty results, or a value the user typed into the field by hand gets
+#   cleared.
+#
+# TARGET_FIELD_NAME = "<Custom field to write>"
+#
+# def MainFunction(project, report, modifyAllowed):
+#     writeAllowed = modifyAllowed
+#     targetField = project.LexiconGetEntryCustomFieldNamed(TARGET_FIELD_NAME)
+#     if writeAllowed and not targetField:
+#         report.Error("The entry-level %s field is missing" % TARGET_FIELD_NAME)
+#         writeAllowed = False
+#
+#     targetWS, targetWSName = project.GetDefaultVernacularWS()
+#     dryRun = "" if writeAllowed else "[DRY RUN] "
+#     report.Info("%sWriting %s in the %s writing system"
+#                 % (dryRun, TARGET_FIELD_NAME, targetWSName))
+#
+#     numberEntries = project.LexiconNumberOfEntries()
+#     report.ProgressStart(numberEntries)
+#
+#     converted = 0
+#     unchanged = 0
+#     for entryNumber, entry in enumerate(project.LexiconAllEntries()):
+#         report.ProgressUpdate(entryNumber)
+#         source = project.LexiconGetLexemeForm(entry)
+#         result = convert(source)
+#         report.Info(source + " -> " + result)
+#         if not result:
+#             unchanged += 1
+#             continue
+#         converted += 1
+#         if writeAllowed:
+#             project.LexiconSetFieldText(entry, targetField, result, targetWS)
+#
+#     report.Info("%s%s %s for %d of %d entries; left %d unchanged"
+#                 % (dryRun, "Wrote" if writeAllowed else "Would write",
+#                    TARGET_FIELD_NAME, converted, numberEntries, unchanged))
+#
+# Also set FTM_ModifiesDB to True in docs above once this is live.
 
 #----------------------------------------------------------------
 # The name 'FlexToolsModule' must be defined like this:
