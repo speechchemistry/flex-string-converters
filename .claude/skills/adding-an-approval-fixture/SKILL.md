@@ -55,8 +55,10 @@ line, and promote only once the new output is confirmed correct — never on tru
 ## Adding approval testing to a converter for the first time
 
 If the converter has no `tests/test_<name>_cli.py` yet, create one following
-`tests/test_chao_tones_cli.py`'s shape: the same `_input_fixtures()`, `_assert_approved()`, and
-`_promote_command()` helpers, adjusted for the new converter's paths. Keep the CLI subprocess call's
-`encoding="utf-8"` explicit — not `text=True` — since the locale code page can otherwise mangle
-non-ASCII output, and compare the approved file and the actual output exactly, with no scrubbing and
-no Unicode normalisation, unless the converter's own `SPEC.md` entry says otherwise.
+`tests/test_chao_accents_cli.py`'s shape: import `input_fixtures()` and `assert_approved()` from the
+shared `tests/approval.py` harness (lifted out of the original `chao_tones` CLI test so a second
+converter's CLI test doesn't duplicate the same ~100-line harness) rather than re-implementing fixture
+pairing or promotion. Keep the CLI subprocess call's `encoding="utf-8"` explicit — not `text=True` —
+since the locale code page can otherwise mangle non-ASCII output, and compare the approved file and the
+actual output exactly, with no scrubbing and no Unicode normalisation, unless the converter's own
+`SPEC.md` entry says otherwise.

@@ -58,6 +58,36 @@ Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
 
 **Dependencies.** Python 3 and the `regex` package.
 
+## Accent Notation From Chao Tone Letters
+
+Converter: `converters/chao_accents.py`. Reverses `converters/chao_tones.py`: given base text followed by the Chao tone letters extracted from it, places tone-accent diacritics back onto the tone-bearing units they belong to. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency.
+
+**Transform of `convert()`.**
+
+1. The input is matched against `^(?P<base>.*?)\s+(?P<tones>[˥-˩][˥-˩ ]*)$` — a non-greedy base so the longest legitimate trailing run of Chao tone letters and spaces wins. No match — including an input that is *entirely* tone letters, with no base text before it — means there is nothing to re-attach, and the input is returned unchanged.
+2. The matched `tones` section is split into per-word groups on runs of two or more spaces, then each word's groups are split into per-unit tone-letter strings on single spaces.
+3. The matched `base` text is walked into tone-bearing units exactly as `chao_tones.py`'s `extract_chao_letters()` does (see that converter's step 2 above), using its own copy of the tone-bearing vowel set and syllabic marks.
+4. Each base-text word's units are matched positionally, in order, against that word's tone-letter groups from step 2. For a unit of *m* tone-bearing clusters receiving a group of *k* tone-letter characters:
+   - the whole group is one of the 13 recognised tone-letter values and *m* = 1 → place that single accent on the one cluster (`ka ˨˦` → `kǎ`).
+   - *k* = 1 → repeat that accent on every cluster in the unit (`kai ˧` → `kāī`).
+   - *k* = *m* → place one accent per cluster, in order (`kai ˨˦` → `kàí`).
+   - otherwise → the input is returned unchanged (this is where a contour with no accent equivalent lands — see below).
+
+   The accent is appended after any marks the cluster already carries, and the whole result is normalised to NFC.
+5. The whole input is returned unchanged, rather than partially converted, whenever: the number of words in the base text doesn't match the number of per-word tone-letter groups; a word's group count doesn't match its unit count; or a unit's group/cluster combination doesn't fit any of step 4's rules. A line that comes back still visibly carrying its tone letters is self-diagnosing.
+
+   Only 8 contours have a combining-accent equivalent — `˨˦ ˦˨ ˧˦ ˨˧ ˨˦˨ ˧˨ ˦˧ ˦˨˦` — so a contour such as `˨˩` or `˥˩` cannot be placed as a single accent and always falls into this unchanged case (e.g. `ka ˨˩` → `ka ˨˩`, unchanged) when it is the whole of a one-cluster unit's group.
+
+Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`.
+
+**Round-trip status.** `chao_tones.py`'s `convert()` followed by this converter's `convert()` returns the original word exactly, for every word that isn't one of the two cases below. This converter's `convert()` followed by `chao_tones.py`'s `convert()` is always exact.
+
+What does not round trip: which vowels of a diphthong originally carried an accent is not recoverable, since a level tone repeated across a diphthong and a level tone written on only one of its vowels produce the same tone letters (`kāi` and `kāī` both give `kai ˧`, and this converter always writes `kāī`), and likewise for a contour written as a single accent versus one letter per vowel (`kǎi` and `kàí` both give `kai ˨˦`, and this converter always writes `kàí`).
+
+**Command line.** Identical to `chao_tones.py`'s: text given as arguments converts one result per line, in the order given; with no arguments the converter reads standard input line by line; results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8.
+
+**Dependencies.** Python 3 and the `regex` package.
+
 ### Extract Chao Tone Letters From Accent Notation (FlexTools module)
 
 Module: `Extract_Chao_tone_letters_from_accent_notation.py`, wrapping the converter above. `FTM_ModifiesDB` is true.
@@ -91,3 +121,6 @@ Behaviours that are not pinned down yet. Add to the sections above as each is se
 
 - Behaviour when an entry has no lexeme form in the default vernacular writing system.
 - Reading a source form from a writing system other than the default vernacular.
+- A FlexTools module wrapping `converters/chao_accents.py` to write accent notation back onto a FLEx field. Deliberately not built: it would write lexeme forms, a riskier write than `Pitch`. See [`plans/chao-tones-per-syllable-and-reverse.md`](plans/chao-tones-per-syllable-and-reverse.md) for the reasoning.
+- Fixtures exercising a diphthong in `chao_accents.py`'s approval corpus. There are no attested diphthong forms to hand yet; the unit tests cover the rule in the meantime (see the same plan's Approval corpus section).
+- Which rule should eventually replace `chao_accents.py`'s bail-out on a contour with no accent equivalent (e.g. `ka ˨˩`). Two alternatives were considered and deferred: duplicating the vowel with one level accent per step (`ka ˨˩` → `kàȁ`), which changes the base spelling and breaks the round trip; or stacking the level accents on one vowel, which keeps the spelling but is not conventional notation. See the same plan's "Deferred, and documented" section for the full discussion.

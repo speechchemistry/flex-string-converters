@@ -1,6 +1,6 @@
 # Per-syllable tone letters in `chao_tones.py`, then a reverse converter
 
-Status: approved 2026-08-19. Change 1 implemented 2026-08-19; change 2 not yet implemented. Two changes, in this order; all
+Status: approved 2026-08-19. Change 1 implemented 2026-08-19; change 2 implemented 2026-08-20. Two changes, in this order; all
 decisions settled with the user. Supersedes the earlier reverse-only draft this file replaced (renamed
 from `chao-accents-reverse.md`), which assumed the forward converter would stay as it is.
 

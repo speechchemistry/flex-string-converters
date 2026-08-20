@@ -27,6 +27,21 @@ It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is n
 
 It should also work as a FLEx Process once FLEx allows Python 3 processes (at the time of writing it only allows Python 2 processes, but the developers are working on upgrading this).
 
+### `converters/chao_accents.py`
+
+Reverses `chao_tones.py`: `convert()` places Chao tone letters back onto their base text as tone-accent diacritics. For example `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. A line that doesn't correspond 1:1 to its tone letters — a word not accounted for, or a contour with no accent equivalent — is returned unchanged rather than partially converted, so it stays visibly unconverted for review.
+
+```
+$ echo 'nəjɛt ˨ ˨˧' | python3 converters/chao_accents.py
+nə̀jɛ᷅t
+
+$ python3 converters/chao_accents.py 'nəjɛt ˨ ˨˧' 'olo ˨˦ ˧'
+nə̀jɛ᷅t
+ǒlō
+```
+
+It needs the same `regex` package as `chao_tones.py`; FieldWorks is not required. There is no FlexTools module for this direction yet — see [SPEC.md's Not Yet Specified section](SPEC.md#not-yet-specified).
+
 ## FlexTools modules
 
 To install, copy this whole folder into your FlexTools `Modules` folder, keeping its structure. FlexTools only looks one folder deep for modules, so `converters/`, `tests/` and `plans/` are left alone, and `__Template_converter_module.py` is skipped because its name starts with `__`.
@@ -65,13 +80,15 @@ from the repository root. The converter tests run on any platform; so do the mod
 
 ### Approval testing
 
-`chao_tones.py`'s CLI is covered end to end by an approval-testing suite, following the same Emily Bache workflow used by the sibling [audio_label_file_conversions](https://github.com/speechchemistry/audio_label_file_conversions) and [lexicon_file_conversions](https://github.com/speechchemistry/lexicon_file_conversions) repositories:
+`chao_tones.py`'s and `chao_accents.py`'s CLIs are each covered end to end by an approval-testing suite, following the same Emily Bache workflow used by the sibling [audio_label_file_conversions](https://github.com/speechchemistry/audio_label_file_conversions) and [lexicon_file_conversions](https://github.com/speechchemistry/lexicon_file_conversions) repositories:
 
-- Input fixtures are in `tests/fixtures/chao_tones/inputs/*.txt`.
-- Approved outputs are in `tests/fixtures/chao_tones/approved/*.approved.txt`.
-- On a mismatch — or on a brand new fixture that has no approved output yet — the proposed output is written to `tests/fixtures/chao_tones/received/*.received.txt`, and the test failure prints the exact command to promote it.
+- Input fixtures are in `tests/fixtures/<converter>/inputs/*.txt`.
+- Approved outputs are in `tests/fixtures/<converter>/approved/*.approved.txt`.
+- On a mismatch — or on a brand new fixture that has no approved output yet — the proposed output is written to `tests/fixtures/<converter>/received/*.received.txt`, and the test failure prints the exact command to promote it.
 
-Unlike the EAF/XML fixtures in those sibling repos, comparison here is exact: no scrubbing and no Unicode normalisation, since NFC/NFD handling is itself part of what `convert()` guarantees.
+Unlike the EAF/XML fixtures in those sibling repos, comparison here is exact: no scrubbing and no Unicode normalisation, since NFC/NFD handling is itself part of what each `convert()` guarantees.
+
+Most of `chao_accents.py`'s input fixtures are `chao_tones.py`'s own approved outputs, copied over as-is: that makes its approval suite a genuine round-trip regression net against real converter output, rather than a fresh set of guesses.
 
 To add a fixture or approve a changed one: drop or edit a `.txt` file under `inputs/`, run the tests, **read** the resulting `.received.txt` file, and only once it looks correct, run the `cp` command the failure prints to promote it into `approved/`. See the [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) skill for the full procedure.
 
