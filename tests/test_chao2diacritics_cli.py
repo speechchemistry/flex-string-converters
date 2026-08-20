@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 #
-#   Approval tests for the chao_accents.py command line interface
+#   Approval tests for the chao2diacritics.py command line interface
 #
-#   Each file in tests/fixtures/chao_accents/inputs/ is fed to the
+#   Each file in tests/fixtures/chao2diacritics/inputs/ is fed to the
 #   converter's CLI a line at a time via stdin, and its stdout must match
 #   byte-for-byte the corresponding
-#   tests/fixtures/chao_accents/approved/<stem>.approved.txt (compared as
+#   tests/fixtures/chao2diacritics/approved/<stem>.approved.txt (compared as
 #   decoded UTF-8 text, so only real content differences count, not
 #   platform line endings). No scrubbing and no Unicode normalisation are
 #   applied to either side: NFC output is itself part of what convert()
 #   guarantees, so normalising the comparison would hide a real regression.
 #
-#   Most of these input files are exactly chao_tones.py's own approved
-#   outputs (see tests/fixtures/chao_tones/approved/), which makes this a
-#   genuine round-trip regression net rather than a fresh set of guesses.
+#   Most of these input files are exactly diacritics2chao.py's own approved
+#   outputs (see tests/fixtures/diacritics2chao/approved/), which makes this
+#   a genuine round-trip regression net rather than a fresh set of guesses.
 #
 #   A fixture with no approved file yet is not a test failure in the usual
 #   sense: it is a first approval. The proposed output is written to
-#   tests/fixtures/chao_accents/received/ either way, and the failure
+#   tests/fixtures/chao2diacritics/received/ either way, and the failure
 #   message gives the exact command to promote it once it has been read and
 #   found correct. Nothing is ever written into approved/ automatically.
 #
@@ -29,8 +29,8 @@ import pytest
 
 from approval import REPO_ROOT, assert_approved, input_fixtures
 
-CONVERTER_NAME = "chao_accents"
-CONVERTER_PATH = REPO_ROOT / "converters" / "chao_accents.py"
+CONVERTER_NAME = "chao2diacritics"
+CONVERTER_PATH = REPO_ROOT / "converters" / "chao2diacritics.py"
 
 
 @pytest.mark.parametrize("input_path,approved_path", input_fixtures(CONVERTER_NAME))

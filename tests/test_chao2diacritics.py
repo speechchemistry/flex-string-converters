@@ -1,50 +1,50 @@
 # -*- coding: utf-8 -*-
 #
-#   Tests for the accent-notation-from-Chao-tone-letters conversion
+#   Tests for the tone-diacritics-from-Chao-tone-letters conversion
 #
-#   These exercise convert() and apply_chao_letters() directly: both take
-#   and return a plain string and need no FLEx project, so they run on any
-#   platform.
+#   These exercise convert() and chao_letters_to_tone_diacritics() directly:
+#   both take and return a plain string and need no FLEx project, so they
+#   run on any platform.
 #
 
 import unicodedata
 
 import pytest
 
-import chao_tones
-from chao_accents import (
-    TONE_LETTERS_TO_ACCENT,
+import diacritics2chao
+from chao2diacritics import (
+    CHAO_LETTERS_TO_TONE_DIACRITIC,
     TONE_BEARING_VOWELS,
     SYLLABIC_MARKS,
-    apply_chao_letters,
+    chao_letters_to_tone_diacritics,
     convert,
 )
 
 
 # ---------------------------------------------------------------
-# Table guards: this file's copies must never drift from chao_tones.py's.
+# Table guards: this file's copies must never drift from diacritics2chao.py's.
 
 
-def test_tone_letters_to_accent_is_the_exact_inverse_of_accent_to_tone_letters():
-    accent_to_tone_letters = chao_tones.ACCENT_TO_TONE_LETTERS
-    assert len(TONE_LETTERS_TO_ACCENT) == len(accent_to_tone_letters) == 13
+def test_chao_letters_to_tone_diacritic_is_the_exact_inverse_of_tone_diacritic_to_chao_letters():
+    tone_diacritic_to_chao_letters = diacritics2chao.TONE_DIACRITIC_TO_CHAO_LETTERS
+    assert len(CHAO_LETTERS_TO_TONE_DIACRITIC) == len(tone_diacritic_to_chao_letters) == 13
     inverse = {
-        tone_letters: accent
-        for accent, tone_letters in accent_to_tone_letters.items()
+        chao_letters: diacritic
+        for diacritic, chao_letters in tone_diacritic_to_chao_letters.items()
     }
-    assert TONE_LETTERS_TO_ACCENT == inverse
+    assert CHAO_LETTERS_TO_TONE_DIACRITIC == inverse
 
 
-def test_tone_bearing_vowels_matches_chao_tones():
-    assert TONE_BEARING_VOWELS == chao_tones.TONE_BEARING_VOWELS
+def test_tone_bearing_vowels_matches_diacritics2chao():
+    assert TONE_BEARING_VOWELS == diacritics2chao.TONE_BEARING_VOWELS
 
 
-def test_syllabic_marks_matches_chao_tones():
-    assert SYLLABIC_MARKS == chao_tones.SYLLABIC_MARKS
+def test_syllabic_marks_matches_diacritics2chao():
+    assert SYLLABIC_MARKS == diacritics2chao.SYLLABIC_MARKS
 
 
 # ---------------------------------------------------------------
-# One case per accent row, parametrized off the reverse table.
+# One case per tone diacritic row, parametrized off the reverse table.
 
 
 @pytest.mark.parametrize("tone_letters, expected", [
@@ -52,8 +52,8 @@ def test_syllabic_marks_matches_chao_tones():
     ("˨˦", "ǒ"), ("˦˨", "ô"), ("˧˦", "o᷄"), ("˨˧", "o᷅"),
     ("˨˦˨", "o᷈"), ("˧˨", "o᷆"), ("˦˧", "o᷇"), ("˦˨˦", "o᷉"),
 ])
-def test_apply_chao_letters_one_case_per_accent_row(tone_letters, expected):
-    assert apply_chao_letters("o", tone_letters) == unicodedata.normalize("NFC", expected)
+def test_chao_letters_to_tone_diacritics_one_case_per_row(tone_letters, expected):
+    assert chao_letters_to_tone_diacritics("o", tone_letters) == unicodedata.normalize("NFC", expected)
 
 
 # ---------------------------------------------------------------
@@ -79,7 +79,7 @@ def test_plain_consonant_cannot_carry_a_tone():
     assert convert("n ˧") == "n ˧"
 
 
-def test_length_mark_keeps_the_accent_on_the_vowel():
+def test_length_mark_keeps_the_diacritic_on_the_vowel():
     assert convert("oː ˧") == unicodedata.normalize("NFC", "ōː")
 
 
@@ -111,19 +111,19 @@ def test_passthrough(text):
 @pytest.mark.parametrize("text", [
     "cat ˨ ˧ ˦",   # more groups than units
     "nət nət ˨",   # a toneless word leaves the group count short of the word count
-    "o ˥˩",        # a contour with no accent among the 13
-    "ka ˨˩",       # a contour with no accent among the 13
+    "o ˥˩",        # a contour with no tone diacritic among the 13
+    "ka ˨˩",       # a contour with no tone diacritic among the 13
 ])
 def test_mismatch_returns_the_input_unchanged(text):
     assert convert(text) == text
 
 
 # ---------------------------------------------------------------
-# Round trip: chao_tones.convert() followed by chao_accents.convert()
+# Round trip: diacritics2chao.convert() followed by chao2diacritics.convert()
 # returns the original word, for words where the forward conversion loses
-# no information. A diphthong whose accent placement is ambiguous on the
-# way back (e.g. kǎi, whose tone letters are indistinguishable from kàí's)
-# is a documented exception and deliberately left out -- see this
+# no information. A diphthong whose tone diacritic placement is ambiguous
+# on the way back (e.g. kǎi, whose tone letters are indistinguishable from
+# kàí's) is a documented exception and deliberately left out -- see this
 # converter's SPEC.md entry.
 
 ROUND_TRIP_WORDS = [
@@ -135,7 +135,7 @@ ROUND_TRIP_WORDS = [
     "kāī",
     "kàí",
     "m̩̄ā",
-    # Plateau examples (tests/fixtures/chao_tones/inputs/plateau_examples.txt)
+    # Plateau examples (tests/fixtures/diacritics2chao/inputs/plateau_examples.txt)
     "m̩̄pa᷆d",
     "xɛ̃̀ɾī",
     "sākpō",
@@ -148,4 +148,4 @@ ROUND_TRIP_WORDS = [
 
 @pytest.mark.parametrize("word", ROUND_TRIP_WORDS)
 def test_round_trip(word):
-    assert convert(chao_tones.convert(word)) == unicodedata.normalize("NFC", word)
+    assert convert(diacritics2chao.convert(word)) == unicodedata.normalize("NFC", word)
