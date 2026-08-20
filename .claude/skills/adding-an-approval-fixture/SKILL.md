@@ -9,13 +9,13 @@ compatibility: any Python 3 environment with pytest installed; no FieldWorks or 
 
 This repository's approval tests compare a converter's command line stdout against a checked-in
 "approved" file. See [AGENTS.md's Testing Approach section](../../../AGENTS.md#testing-approach) for
-the conventions this procedure follows, and `tests/test_chao_tones_cli.py` with
-`tests/fixtures/chao_tones/` for the worked example.
+the conventions this procedure follows, and `tests/test_diacritics2chao_cli.py` with
+`tests/fixtures/diacritics2chao/` for the worked example.
 
 ## Adding a brand new fixture
 
-1. Decide which converter's test file it belongs to (e.g. `tests/test_chao_tones_cli.py`) and its
-   fixture directory (e.g. `tests/fixtures/chao_tones/`).
+1. Decide which converter's test file it belongs to (e.g. `tests/test_diacritics2chao_cli.py`) and its
+   fixture directory (e.g. `tests/fixtures/diacritics2chao/`).
 2. Write the input as a plain `.txt` file under that converter's `inputs/` directory, one line of
    real input per line. Do not add comment lines or labels — the filename is the label, and every
    line must be real input the converter will actually see. Prefer attested real-world examples;
@@ -55,8 +55,8 @@ line, and promote only once the new output is confirmed correct — never on tru
 ## Adding approval testing to a converter for the first time
 
 If the converter has no `tests/test_<name>_cli.py` yet, create one following
-`tests/test_chao_accents_cli.py`'s shape: import `input_fixtures()` and `assert_approved()` from the
-shared `tests/approval.py` harness (lifted out of the original `chao_tones` CLI test so a second
+`tests/test_chao2diacritics_cli.py`'s shape: import `input_fixtures()` and `assert_approved()` from the
+shared `tests/approval.py` harness (lifted out of the original `diacritics2chao` CLI test so a second
 converter's CLI test doesn't duplicate the same ~100-line harness) rather than re-implementing fixture
 pairing or promotion. Keep the CLI subprocess call's `encoding="utf-8"` explicit — not `text=True` —
 since the locale code page can otherwise mangle non-ASCII output, and compare the approved file and the
