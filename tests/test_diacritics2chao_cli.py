@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 #
-#   Approval tests for the chao_tones.py command line interface
+#   Approval tests for the diacritics2chao.py command line interface
 #
-#   Each file in tests/fixtures/chao_tones/inputs/ is fed to the converter's
-#   CLI a line at a time via stdin, and its stdout must match byte-for-byte
-#   the corresponding tests/fixtures/chao_tones/approved/<stem>.approved.txt
-#   (compared as decoded UTF-8 text, so only real content differences count,
-#   not platform line endings). No scrubbing and no Unicode normalisation are
-#   applied to either side: NFC/NFD handling is itself part of what convert()
-#   guarantees, so normalising the comparison would hide a real regression.
+#   Each file in tests/fixtures/diacritics2chao/inputs/ is fed to the
+#   converter's CLI a line at a time via stdin, and its stdout must match
+#   byte-for-byte the corresponding
+#   tests/fixtures/diacritics2chao/approved/<stem>.approved.txt (compared as
+#   decoded UTF-8 text, so only real content differences count, not platform
+#   line endings). No scrubbing and no Unicode normalisation are applied to
+#   either side: NFC/NFD handling is itself part of what convert() guarantees,
+#   so normalising the comparison would hide a real regression.
 #
 #   A fixture with no approved file yet is not a test failure in the usual
 #   sense: it is a first approval. The proposed output is written to
-#   tests/fixtures/chao_tones/received/ either way, and the failure message
-#   gives the exact command to promote it once it has been read and found
-#   correct. Nothing is ever written into approved/ automatically.
+#   tests/fixtures/diacritics2chao/received/ either way, and the failure
+#   message gives the exact command to promote it once it has been read and
+#   found correct. Nothing is ever written into approved/ automatically.
 #
 
 import subprocess
@@ -24,8 +25,8 @@ import pytest
 
 from approval import REPO_ROOT, assert_approved, input_fixtures
 
-CONVERTER_NAME = "chao_tones"
-CONVERTER_PATH = REPO_ROOT / "converters" / "chao_tones.py"
+CONVERTER_NAME = "diacritics2chao"
+CONVERTER_PATH = REPO_ROOT / "converters" / "diacritics2chao.py"
 INPUTS_DIR = REPO_ROOT / "tests" / "fixtures" / CONVERTER_NAME / "inputs"
 APPROVED_DIR = REPO_ROOT / "tests" / "fixtures" / CONVERTER_NAME / "approved"
 

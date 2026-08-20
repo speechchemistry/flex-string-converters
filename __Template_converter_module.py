@@ -10,7 +10,7 @@
 #
 #   To write the result back into a custom field, see the "Writing the result
 #   back" block below MainFunction and the worked example in
-#   Extract_Chao_tone_letters_from_accent_notation.py.
+#   Extract_Chao_tone_letters_from_tone_diacritics.py.
 #
 #   The leading __ keeps FlexTools from importing this file as a module of its
 #   own: the scanner skips __-prefixed files before importing them. Copies must
@@ -29,7 +29,7 @@ from flextoolslib import *
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "converters"))
-# replace my_converter with your converter's module name e.g. from chao_tones import convert
+# replace my_converter with your converter's module name e.g. from diacritics2chao import convert
 from my_converter import convert
 
 #----------------------------------------------------------------
@@ -80,7 +80,7 @@ def MainFunction(project, report, modifyAllowed):
 # Writing the result back
 #
 # Uncomment and adapt this once the read-only report above looks right. See
-# Extract_Chao_tone_letters_from_accent_notation.py for the full worked
+# Extract_Chao_tone_letters_from_tone_diacritics.py for the full worked
 # example. Three traps to know about, since each one fails silently:
 #
 # - LexiconSetFieldText defaults to the default *analysis* writing system, so

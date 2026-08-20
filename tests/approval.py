@@ -2,10 +2,10 @@
 #
 #   Shared approval-testing harness for a converter's CLI
 #
-#   Lifted out of the chao_tones CLI test so a second converter's CLI test
-#   doesn't duplicate the same harness. See AGENTS.md's Testing Approach for
-#   what the approval-testing convention guarantees, and
-#   tests/test_chao_tones_cli.py for the worked example that first
+#   Lifted out of the diacritics2chao CLI test so a second converter's CLI
+#   test doesn't duplicate the same harness. See AGENTS.md's Testing Approach
+#   for what the approval-testing convention guarantees, and
+#   tests/test_diacritics2chao_cli.py for the worked example that first
 #   introduced it.
 #
 #   A fixture with no approved file yet is not a test failure in the usual

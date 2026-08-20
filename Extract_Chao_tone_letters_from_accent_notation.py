@@ -18,7 +18,7 @@ from flextoolslib import *
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "converters"))
-from chao_tones import convert
+from diacritics2chao import convert
 
 #----------------------------------------------------------------
 # Documentation for the user:
