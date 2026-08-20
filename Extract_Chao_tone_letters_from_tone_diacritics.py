@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 #
-#   Extract Chao tone letters from accent notation
+#   Extract Chao tone letters from tone diacritics
 #
 #   Goes through all the lexeme forms and extracts Chao tone letters (only)
-#   from any accent notation and puts it into a Custom Pitch field
+#   from any tone diacritics and puts it into a Custom Pitch field
 #
 #   Tim Kempton
 #   August 2024
@@ -23,16 +23,16 @@ from diacritics2chao import convert
 #----------------------------------------------------------------
 # Documentation for the user:
 
-docs = {FTM_Name       : "Extract Chao tone letters from accent notation and put in pitch field",
-        FTM_Version    : 0.8,
+docs = {FTM_Name       : "Extract Chao tone letters from tone diacritics and put in pitch field",
+        FTM_Version    : 0.9,
         FTM_ModifiesDB : True,
-        FTM_Synopsis   : "Extracts Chao tone letters (only) from any accent notation",
+        FTM_Synopsis   : "Extracts Chao tone letters (only) from any tone diacritics",
         FTM_Help       : None,
         FTM_Description:
 """
-Goes through all the lexeme forms and puts the spelled form (with tone-accent
-marks stripped), followed by its Chao tone letters when it has any, into a
-Custom Pitch field. You can use Bulk Edit Entries in Flex to move these to
+Goes through all the lexeme forms and puts the spelled form (with tone
+diacritics stripped), followed by its Chao tone letters when it has any, into
+a Custom Pitch field. You can use Bulk Edit Entries in Flex to move these to
 the desired field.
 
 Re-running replaces the Pitch value rather than adding to it. Only an entry
