@@ -1,6 +1,6 @@
 # Zhire phonemic-to-orthography converter, built as a pynini FST
 
-Status: proposed 2026-08-24, not yet implemented. `pynini` is installed, and the whole mapping table
+Status: proposed 2026-08-24, implemented 2026-08-24. `pynini` is installed, and the whole mapping table
 below has been validated against 99 real phonemic/orthographic word pairs (see [Validation against
 real sample data](#validation-against-real-sample-data)) with a throwaway prototype — not yet the
 actual converter file. Approval-test fixtures and a failing (pre-implementation) test file have been

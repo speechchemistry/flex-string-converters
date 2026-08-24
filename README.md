@@ -58,6 +58,34 @@ It requires that you set the source lexeme field writing system as the default v
 
 The `Pitch` field should show that same default vernacular writing system, because that is the one the module writes to. Each run reports which writing system it used and what type the `Pitch` field is, so you can check. If your `Pitch` field uses a different writing system, set the `PITCH_WS` constant near the top of the module to its language tag.
 
+## `zhire/`
+
+Converting a Zhire `[zhi]` phonemic transcription to its orthographic spelling, per the Zhire
+orthography statement.
+
+### `zhire/converters/phonemic2orthography.py`
+
+`convert()` strips tone diacritics (the orthography has no tone-marking convention yet) and maps the
+remaining phonemic string to its orthographic spelling using a finite-state transducer, e.g. `hwōrì`
+→ `whori`.
+
+```
+$ echo 'hwōrì' | python3 zhire/converters/phonemic2orthography.py
+whori
+
+$ python3 zhire/converters/phonemic2orthography.py 'hwōrì' 'ɔ̃ː'
+whori
+ɔ̃ɔ̃
+```
+
+An input symbol or sequence the mapping doesn't cover raises an error naming the offending input,
+rather than passing it through unchanged or dropping it silently.
+
+It needs Python 3 and the `pynini` package (`pip install pynini`). `pynini` has prebuilt wheels for
+Linux; macOS and Windows need conda-forge instead, and Windows has no native wheel at all — install
+via WSL there. There is no FlexTools module for this converter: FlexTools modules run under Python
+.NET/IronPython on Windows, which `pynini` does not support.
+
 ## `__Template_converter_module.py`
 
 Kept at the repository root, since it isn't specific to any one project folder. A starting point for a new module: copy it into the target project folder under a name without the leading `__`, point it at your converter, and change the marked places. It reads the lexeme form of every entry and reports what your converter would produce; it writes nothing and needs no custom field, so a fresh copy runs immediately against any project. Writing the result back into a field is a commented-out block below `MainFunction` that you uncomment once the read-only report looks right — see `chao-tone-letters/Extract_Chao_tone_letters_from_tone_diacritics.py` above for the worked example, and the [`adding-a-flextools-module`](.claude/skills/adding-a-flextools-module/SKILL.md) skill for the full procedure.

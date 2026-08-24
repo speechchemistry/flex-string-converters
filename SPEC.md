@@ -15,3 +15,5 @@ actually built, rather than speculatively.
 - [`chao-tone-letters/SPEC.md`](chao-tone-letters/SPEC.md) — converting between tone diacritics and
   Chao tone letters, and extracting Chao tone letters into a FLEx `Pitch` field. Not specific to any
   one language.
+- [`zhire/SPEC.md`](zhire/SPEC.md) — converting a Zhire `[zhi]` phonemic transcription to its
+  orthographic spelling.
