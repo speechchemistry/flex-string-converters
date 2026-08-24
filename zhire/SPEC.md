@@ -21,6 +21,12 @@ fall out of plain concatenation).
 1. The input is normalised to NFD, then every combining mark (Unicode category `Mn`) is deleted
    **except** the nasalisation tilde (`U+0303`) — this strips tone diacritics, since the orthography
    has no tone-marking convention yet, while keeping nasalisation.
+
+   This deletion is general rather than a list of known tone marks, so it also removes any *other*
+   combining mark: `ŋ̊` (`ŋ` plus a combining ring above, a voiceless velar nasal) converts to `ng`
+   with the ring silently dropped, rather than raising the way an unrecognised base letter does in
+   step 3. Combining marks are therefore the one exception to this converter's "never silently drop
+   anything" rule. Real Zhire phonemic data uses no such marks, so this has not come up in practice.
 2. The tone-stripped string is matched against a token lexicon using a finite-state transducer (built
    with [pynini](https://pypi.org/project/pynini/)), which tokenises the input into the longest
    possible sequence of known phoneme tokens (maximal munch) and maps each to its grapheme:
@@ -62,7 +68,8 @@ fall out of plain concatenation).
    above already produces the correct grapheme sequence for these.
 3. Any input that contains a symbol, or a sequence of symbols, not covered by the token lexicon above
    causes `convert()` to raise `ValueError` naming the offending input — it does not pass unmapped
-   text through unchanged or silently drop it. This includes the orthography statement's
+   text through unchanged or silently drop it. This applies to base letters and their sequences;
+   combining marks never reach this check, having already been dropped or kept by step 1. This includes the orthography statement's
    `Cʷ`/`Cʲ`/`ᵑ`/`ᵐ`/`ⁿ` modifier-letter notation, which real phonemic data doesn't currently use (it
    spells these sounds with plain letter sequences instead — see step 2's fallout above).
 4. The result is normalised to NFC before being returned.

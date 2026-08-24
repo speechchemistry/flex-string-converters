@@ -299,3 +299,41 @@ All resolved:
    completeness of any specific list is no longer a concern.
 
 Ready to implement.
+
+## Corrections found after implementation
+
+Appended rather than edited into the body above, per [AGENTS.md's Plans
+section](../AGENTS.md#plans). Testing the finished converter against the full 99-row corpus showed
+that two rationales this plan states confidently are wrong, and surfaced one behaviour the plan does
+not mention. The converter's output is correct and unchanged throughout — items 1 and 2 concern only
+the *reasons* given for two implementation choices, and were verified to make no difference to any
+result.
+
+1. **`token_type="utf8"` is not "essential", and byte mode does not "shred multi-byte IPA into byte
+   fragments".** Rebuilding the real token lexicon with pynini's default byte token type produced
+   output identical to the utf8 version on all 99 corpus rows and on every unmapped-input case
+   (`ɲ`, `ɜ`, `q`, `ʈʂ`) — byte mode works because the pairs and the input are encoded the same way.
+   `token_type="utf8"` is still the right choice, but for a weaker reason: it makes the FST's symbol
+   alphabet a phoneme rather than a byte, which is what the mapping is actually about and keeps the
+   machine inspectable.
+
+2. **The uniform weight `"1"` is not "what actually produces maximal munch", and has been removed.**
+   Dropping the weights produced identical output on all 99 rows and on the ambiguous override cases
+   (`dʒa` → `ja`, `hwa` → `wha`), and stayed correct under reordering of the lexicon and a three-way
+   `a`/`ab`/`abc` competition. OpenFst's shortest-path search already reaches the fewest-arc path
+   first when all weights are equal, so the weight was never the load-bearing mechanism claimed
+   above — and no test guarded it either, since removing it leaves all tests green. The implemented
+   converter therefore builds unweighted pairs, with a comment recording where maximal munch actually
+   comes from.
+
+   The plan's reasoning for why *length-proportional* weights would not work remains correct, and is
+   kept in that comment as the tempting wrong fix to avoid.
+
+3. **Non-tone combining marks are silently stripped, not rejected.** A consequence of the general
+   "delete every `Mn` mark except `U+0303`" rule that the [Unmapped input](#unmapped-input) section
+   does not mention: `ŋ̊` (`ŋ` + combining ring above, i.e. a voiceless velar nasal) converts to `ng`,
+   the ring silently deleted, rather than raising. So the "unmapped input raises" guarantee holds for
+   base letters but not for combining marks, where anything that is not the nasalisation tilde is
+   dropped. Not a problem for real Zhire data, which uses no such marks, so the behaviour was left as
+   it is and written down instead: `zhire/SPEC.md` now records the asymmetry under both the
+   tone-stripping step and the unmapped-input step.

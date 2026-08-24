@@ -48,15 +48,22 @@ OVERRIDES = {
 
 
 def _build_token_pairs():
-    pairs = [(phoneme, phoneme, "1") for phoneme in VOWELS]
-    pairs += [(phoneme, grapheme, "1") for phoneme, grapheme in ATOMIC_CONSONANTS.items()]
-    pairs += [(phoneme, grapheme, "1") for phoneme, grapheme in OVERRIDES.items()]
-    pairs.append((' ', ' ', "1"))
+    # The pairs deliberately carry no weight. Maximal munch -- preferring
+    # dʒ -> j over d + ʒ -> dzh -- falls out of pynini.shortestpath on its
+    # own: with every arc weighted equally it reaches the fewest-arc path
+    # first, and fewest tokens across a fixed input length means longest
+    # tokens. Weighting by token length would not help, and is the tempting
+    # wrong fix: the input's length is the same however it is tokenised, so
+    # every tokenisation would sum to the same weight.
+    pairs = [(phoneme, phoneme) for phoneme in VOWELS]
+    pairs += list(ATOMIC_CONSONANTS.items())
+    pairs += list(OVERRIDES.items())
+    pairs.append((' ', ' '))
     for vowel in VOWELS:
-        pairs.append((vowel + NASAL_TILDE, vowel + NASAL_TILDE, "1"))
-        pairs.append((vowel + LENGTH_MARK, vowel + vowel, "1"))
+        pairs.append((vowel + NASAL_TILDE, vowel + NASAL_TILDE))
+        pairs.append((vowel + LENGTH_MARK, vowel + vowel))
         pairs.append((vowel + NASAL_TILDE + LENGTH_MARK,
-                      vowel + NASAL_TILDE + vowel + NASAL_TILDE, "1"))
+                      vowel + NASAL_TILDE + vowel + NASAL_TILDE))
     return pairs
 
 
