@@ -63,6 +63,8 @@ Skills in this repository:
 
 - **Don't number Markdown headings** (`## 2. Pitch field`, `## 1. Decide the match rule`) in any file in this repo — `SPEC.md`, skills (`SKILL.md`), and other reference docs — unless there's a specific reason a given file needs it. A numbered heading shifts whenever a section is inserted or reordered above it, silently breaking every cross-reference to it.
 - **Reference a heading elsewhere by Markdown anchor link and its actual name, not a number**: `[chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified)`, not `SPEC.md §3`. An anchor link survives reordering; only a heading rename breaks it, and that's a one-time, greppable fix (`grep -rn '#anchor-slug'`) rather than a renumbering cascade.
+- **Don't hard-wrap prose.** Write one line per paragraph, list item, or table row, and let the editor soft-wrap it — as `AGENTS.md`, `README.md`, `chao-tone-letters/SPEC.md` and the skills already do. Markdown joins consecutive lines into one paragraph anyway, so a manual line break buys nothing and costs a readable diff: editing one word reflows the rest of the paragraph, so the diff shows several changed lines instead of one and `git blame` attributes untouched sentences to the wrong commit. Fixed-width breaks also fight every different window width they are read at.
+- Existing hard-wrapped files are fine to reflow as a deliberate change, **except the frozen plans in `plans/old/`** — reflowing those would rewrite the whole file for no benefit and bury their real history, the same reasoning that keeps a moved plan's stale link targets as written (see [Plans](#plans)).
 
 ## Working Style
 
