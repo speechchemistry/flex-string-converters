@@ -18,6 +18,7 @@
 #   found correct. Nothing is ever written into approved/ automatically.
 #
 
+from pathlib import Path
 import subprocess
 import sys
 
@@ -25,17 +26,19 @@ import pytest
 
 from approval import REPO_ROOT, assert_approved, input_fixtures
 
+TESTS_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = TESTS_DIR.parent
 CONVERTER_NAME = "diacritics2chao"
-CONVERTER_PATH = REPO_ROOT / "converters" / "diacritics2chao.py"
-INPUTS_DIR = REPO_ROOT / "tests" / "fixtures" / CONVERTER_NAME / "inputs"
-APPROVED_DIR = REPO_ROOT / "tests" / "fixtures" / CONVERTER_NAME / "approved"
+CONVERTER_PATH = PROJECT_ROOT / "converters" / "diacritics2chao.py"
+INPUTS_DIR = TESTS_DIR / "fixtures" / CONVERTER_NAME / "inputs"
+APPROVED_DIR = TESTS_DIR / "fixtures" / CONVERTER_NAME / "approved"
 
 
 def _assert_approved(input_path, approved_path, actual):
-    assert_approved(CONVERTER_NAME, input_path, approved_path, actual)
+    assert_approved(TESTS_DIR, CONVERTER_NAME, input_path, approved_path, actual)
 
 
-@pytest.mark.parametrize("input_path,approved_path", input_fixtures(CONVERTER_NAME))
+@pytest.mark.parametrize("input_path,approved_path", input_fixtures(TESTS_DIR, CONVERTER_NAME))
 def test_stdin_lines_convert_to_approved_output(input_path, approved_path):
     # End-to-end CLI test: feed the fixture via stdin and assert stdout
     # matches the approved file, one converted line per input line.

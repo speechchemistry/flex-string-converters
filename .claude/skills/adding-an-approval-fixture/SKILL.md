@@ -9,13 +9,15 @@ compatibility: any Python 3 environment with pytest installed; no FieldWorks or 
 
 This repository's approval tests compare a converter's command line stdout against a checked-in
 "approved" file. See [AGENTS.md's Testing Approach section](../../../AGENTS.md#testing-approach) for
-the conventions this procedure follows, and `tests/test_diacritics2chao_cli.py` with
-`tests/fixtures/diacritics2chao/` for the worked example.
+the conventions this procedure follows, and `chao-tone-letters/tests/test_diacritics2chao_cli.py` with
+`chao-tone-letters/tests/fixtures/diacritics2chao/` for the worked example. Every project keeps its own
+`tests/fixtures/` — this procedure is the same regardless of which project's converter you're covering.
 
 ## Adding a brand new fixture
 
-1. Decide which converter's test file it belongs to (e.g. `tests/test_diacritics2chao_cli.py`) and its
-   fixture directory (e.g. `tests/fixtures/diacritics2chao/`).
+1. Decide which converter's test file it belongs to (e.g.
+   `chao-tone-letters/tests/test_diacritics2chao_cli.py`) and its fixture directory (e.g.
+   `chao-tone-letters/tests/fixtures/diacritics2chao/`).
 2. Write the input as a plain `.txt` file under that converter's `inputs/` directory, one line of
    real input per line. Do not add comment lines or labels — the filename is the label, and every
    line must be real input the converter will actually see. Prefer attested real-world examples;
@@ -31,8 +33,8 @@ the conventions this procedure follows, and `tests/test_diacritics2chao_cli.py` 
    - Keep the file's own final newline, since the converter's CLI always emits one per line.
 4. Run `python -m pytest`. With no approved file yet, the matching test fails on purpose — this is
    the TDD "red" step, not a bug — and writes the proposed output to
-   `tests/fixtures/<converter>/received/<stem>.received.txt`. The failure message prints the exact
-   `cp` command to promote it.
+   `<project>/tests/fixtures/<converter>/received/<stem>.received.txt`. The failure message prints the
+   exact `cp` command to promote it.
 5. **Open and read the received file.** This is the step that makes the fixture worth anything: an
    approved file nobody looked at asserts nothing. Check it against the converter's `SPEC.md` entry,
    not just against what the code happens to currently do.
@@ -54,11 +56,17 @@ line, and promote only once the new output is confirmed correct — never on tru
 
 ## Adding approval testing to a converter for the first time
 
-If the converter has no `tests/test_<name>_cli.py` yet, create one following
-`tests/test_chao2diacritics_cli.py`'s shape: import `input_fixtures()` and `assert_approved()` from the
-shared `tests/approval.py` harness (lifted out of the original `diacritics2chao` CLI test so a second
-converter's CLI test doesn't duplicate the same ~100-line harness) rather than re-implementing fixture
-pairing or promotion. Keep the CLI subprocess call's `encoding="utf-8"` explicit — not `text=True` —
-since the locale code page can otherwise mangle non-ASCII output, and compare the approved file and the
-actual output exactly, with no scrubbing and no Unicode normalisation, unless the converter's own
-`SPEC.md` entry says otherwise.
+If the converter has no `tests/test_<name>_cli.py` yet, create one in that converter's project's
+`tests/` following `chao-tone-letters/tests/test_chao2diacritics_cli.py`'s shape: import
+`input_fixtures()` and `assert_approved()` from the repository-wide shared `tests/approval.py` harness
+(lifted out of the original `diacritics2chao` CLI test so a second converter's CLI test doesn't
+duplicate the same ~100-line harness) rather than re-implementing fixture pairing or promotion. Both
+functions take the calling project's own `tests/` directory explicitly as their first argument — e.g.
+`TESTS_DIR = Path(__file__).resolve().parent` — since each project keeps its own `tests/fixtures/`.
+The project's `conftest.py` puts the repository's shared `tests/` directory on `sys.path` so
+`tests/approval.py` is importable as `approval`; if you're bootstrapping a brand new project's tests
+from scratch, make sure that `conftest.py` does this (see
+[`adding-a-project`](../adding-a-project/SKILL.md)). Keep the CLI subprocess call's `encoding="utf-8"`
+explicit — not `text=True` — since the locale code page can otherwise mangle non-ASCII output, and
+compare the approved file and the actual output exactly, with no scrubbing and no Unicode
+normalisation, unless the converter's own `SPEC.md` entry says otherwise.

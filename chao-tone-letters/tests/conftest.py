@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 #
-#   Shared test setup
+#   Shared test setup for the chao-tone-letters project
 #
-#   Puts converters/ on sys.path so the converters can be imported by name
-#   (import diacritics2chao) when pytest is run from the repo root.
+#   Puts this project's converters/ on sys.path so the converters can be
+#   imported by name (import diacritics2chao) when pytest is run from the
+#   repo root, and puts the repo's shared tests/ directory on sys.path so the
+#   approval-testing harness in tests/approval.py can be imported the same
+#   way.
 #
 #   Also stubs flextoolslib so the module files themselves can be imported off
 #   Windows: flextoolslib only installs alongside FieldWorks, but a module's
@@ -17,9 +20,10 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-CONVERTERS_PATH = REPO_ROOT / "converters"
-sys.path.insert(0, str(CONVERTERS_PATH))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = PROJECT_ROOT.parent
+sys.path.insert(0, str(PROJECT_ROOT / "converters"))
+sys.path.insert(0, str(REPO_ROOT / "tests"))
 
 
 def _install_flextoolslib_stub():
@@ -69,5 +73,5 @@ def chao_module():
     """The Extract Chao tone letters FlexTools module, loaded by file path."""
     return _load_module_by_path(
         "Extract_Chao_tone_letters_from_tone_diacritics",
-        REPO_ROOT / "Extract_Chao_tone_letters_from_tone_diacritics.py",
+        PROJECT_ROOT / "Extract_Chao_tone_letters_from_tone_diacritics.py",
     )
