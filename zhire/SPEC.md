@@ -15,21 +15,21 @@ Converter: `converters/phonemic2orthography.py`. Takes and returns a plain strin
    This deletion is general rather than a list of known tone marks, so it also removes any *other* combining mark: `ŋ̊` (`ŋ` plus a combining ring above, a voiceless velar nasal) converts to `ng` with the ring silently dropped, rather than raising the way an unrecognised base letter does in step 3. Combining marks are therefore the one exception to this converter's "never silently drop anything" rule. Real Zhire phonemic data uses no such marks, so this has not come up in practice.
 2. The tone-stripped string is matched against a token lexicon using a finite-state transducer (built with [pynini](https://pypi.org/project/pynini/)), which tokenises the input into the longest possible sequence of known phoneme tokens (maximal munch) and maps each to its grapheme:
    - The 8 vowels `a e ɛ ə i o ɔ u`, each to its own identical-looking grapheme.
-   - The 21 atomic consonants:
+   - The 22 atomic consonants — including `/l/`, which occurs chiefly in loanwords, common enough with this sound that it needs its own grapheme:
 
      | Phoneme | Grapheme |     | Phoneme | Grapheme |
      | ------- | -------- | --- | ------- | -------- |
-     | b       | b        |     | p       | p        |
-     | d       | d        |     | r       | r        |
-     | f       | f        |     | s       | s        |
-     | ɡ       | g        |     | ʃ       | sh       |
-     | ɣ       | gh       |     | t       | t        |
-     | h       | h        |     | v       | v        |
-     | k       | k        |     | w       | w        |
-     | x       | kh       |     | j       | y        |
+     | b       | b        |     | ŋ       | ng       |
+     | d       | d        |     | p       | p        |
+     | f       | f        |     | r       | r        |
+     | ɡ       | g        |     | s       | s        |
+     | ɣ       | gh       |     | ʃ       | sh       |
+     | h       | h        |     | t       | t        |
+     | k       | k        |     | v       | v        |
+     | x       | kh       |     | w       | w        |
+     | l       | l        |     | j       | y        |
      | m       | m        |     | z       | z        |
      | n       | n        |     | ʒ       | zh       |
-     | ŋ       | ng       |     |         |          |
 
    - Four overrides, for sequences that plain concatenation of the atomic consonants above would get wrong:
 
@@ -57,6 +57,7 @@ Example: `hwōrì` → `whori` (tone stripped, `hw` override applied). `ɔ̃ː` 
 
 Behaviours that are not pinned down yet. Add to the sections above as each is settled or implemented, rather than speculating here.
 
+- Whether the phoneme inventory above is complete. `/l/` was absent until a held-out word exercised it, and the 99-word sample corpus contains no `/l/` at all, so other phonemes the sample happens not to cover may still be missing. Worth checking the implemented inventory against the orthography statement's tables in one pass, rather than one failing word at a time.
 - Syllabic nasals, beyond the ones already in the consonant table above.
 - General morphophonological rules (nasal assimilation, vowel harmony, word-boundary coalescence).
 - Tone *marking* in the orthography — tone is stripped, not re-marked, since there is currently no orthographic tone convention to re-mark it with.

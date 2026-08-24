@@ -31,7 +31,7 @@ VOWELS = ['a', 'e', 'ɛ', 'ə', 'i', 'o', 'ɔ', 'u']
 # Atomic consonants: one grapheme per phoneme, none decomposable further.
 ATOMIC_CONSONANTS = {
     'b': 'b', 'd': 'd', 'f': 'f', 'ɡ': 'g', 'ɣ': 'gh', 'h': 'h', 'k': 'k',
-    'x': 'kh', 'm': 'm', 'n': 'n', 'ŋ': 'ng',
+    'x': 'kh', 'l': 'l', 'm': 'm', 'n': 'n', 'ŋ': 'ng',
     'p': 'p', 'r': 'r', 's': 's', 'ʃ': 'sh', 't': 't', 'v': 'v', 'w': 'w',
     'j': 'y', 'z': 'z', 'ʒ': 'zh',
 }
