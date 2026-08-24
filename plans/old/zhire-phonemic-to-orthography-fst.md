@@ -226,7 +226,7 @@ before reaching the FST), `ã` → `ã`, `iː` → `ii`, and `ɔ̃ː` → `ɔ̃�
 
 Kept out of scope because the orthography statement itself hasn't decided these yet (its own section
 headings for them are still open placeholders) — consistent with
-[AGENTS.md's rule against speculatively extending a spec](../AGENTS.md#specification):
+[AGENTS.md's rule against speculatively extending a spec](../../AGENTS.md#specification):
 
 - Syllabic nasals, beyond the ones already in the main consonant table.
 - General morphophonological rules (nasal assimilation, vowel harmony, word-boundary coalescence).
@@ -242,11 +242,11 @@ not as speculative behaviour built into this converter now.
 
 ## File layout
 
-Following the [`adding-a-project`](../.claude/skills/adding-a-project/SKILL.md) skill's shape, inside
+Following the [`adding-a-project`](../../.claude/skills/adding-a-project/SKILL.md) skill's shape, inside
 the `zhire/` folder already scaffolded:
 
 - `zhire/converters/phonemic2orthography.py` — the converter, per
-  [AGENTS.md's Converter Conventions](../AGENTS.md#converter-conventions): header block, `convert()`,
+  [AGENTS.md's Converter Conventions](../../AGENTS.md#converter-conventions): header block, `convert()`,
   and a command line interface under `if __name__ == '__main__':` matching the existing converters'
   shape (stdin-as-filter, or arguments converted one per line).
 - `zhire/tests/conftest.py` — `sys.path` wiring for `zhire/converters/` and the repo's shared `tests/`
@@ -254,20 +254,20 @@ the `zhire/` folder already scaffolded:
 - `zhire/tests/test_phonemic2orthography.py` — inline unit tests, one per *general rule* (tone
   stripping, length doubling, nasalisation, the override sequences, the unmapped-input error), each
   with one clear example, per
-  [AGENTS.md's rule against duplicating the two test layers](../AGENTS.md#testing-approach).
+  [AGENTS.md's rule against duplicating the two test layers](../../AGENTS.md#testing-approach).
   **Committed**, deliberately failing (`ModuleNotFoundError`) until the converter exists — the TDD
   "red" step.
 - `zhire/tests/fixtures/phonemic2orthography/{inputs,approved}/words.txt` — the 99 real word pairs from
   `sample_phonemic2orthographic_data.csv` (with the one correction noted above), one phonemic
   transcription per line and its orthographic spelling on the matching line of the approved file —
   real attested data from the user, exactly what
-  [AGENTS.md's Testing Approach](../AGENTS.md#testing-approach) prefers over constructed examples.
+  [AGENTS.md's Testing Approach](../../AGENTS.md#testing-approach) prefers over constructed examples.
   **Committed.**
 - `zhire/tests/test_phonemic2orthography_cli.py` — the approval test driving those fixtures through the
   CLI, following `chao-tone-letters/tests/test_diacritics2chao_cli.py`'s shape. **Committed**,
   deliberately failing until the converter exists.
 - `zhire/converters/phonemic2orthography.py` — the converter itself, per
-  [AGENTS.md's Converter Conventions](../AGENTS.md#converter-conventions): header block, `convert()`,
+  [AGENTS.md's Converter Conventions](../../AGENTS.md#converter-conventions): header block, `convert()`,
   and a command line interface under `if __name__ == '__main__':` matching the existing converters'
   shape (stdin-as-filter, or arguments converted one per line). **Not yet written** — this is the next
   step, to make the above go green.
@@ -277,7 +277,7 @@ the `zhire/` folder already scaffolded:
 - `zhire/SPEC.md` — replace the "nothing implemented yet" placeholder with the converter's actual
   contract, following `chao-tone-letters/SPEC.md`'s shape.
 - Root `SPEC.md` — add the `zhire` entry to the Projects list (deliberately not done yet — see
-  [AGENTS.md's Specification section](../AGENTS.md#specification) on not registering a project ahead
+  [AGENTS.md's Specification section](../../AGENTS.md#specification) on not registering a project ahead
   of its converter existing).
 - `README.md` — a `zhire/` section following the existing `chao-tone-letters/` sections' shape, naming
   `pynini` as a dependency and noting its platform support explicitly (pip-installable prebuilt wheels
@@ -303,7 +303,7 @@ Ready to implement.
 ## Corrections found after implementation
 
 Appended rather than edited into the body above, per [AGENTS.md's Plans
-section](../AGENTS.md#plans). Testing the finished converter against the full 99-row corpus showed
+section](../../AGENTS.md#plans). Testing the finished converter against the full 99-row corpus showed
 that two rationales this plan states confidently are wrong, and surfaced one behaviour the plan does
 not mention. The converter's output is correct and unchanged throughout — items 1 and 2 concern only
 the *reasons* given for two implementation choices, and were verified to make no difference to any

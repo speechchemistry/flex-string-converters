@@ -69,7 +69,7 @@ Changes:
   and reports only, needs no custom field, and that writing back is a commented block you
   uncomment. Nothing else in the README changes; the Chao module's section still describes its
   `Pitch` requirement accurately.
-- **`AGENTS.md`** — under [FlexTools Module Conventions](../AGENTS.md#flextools-module-conventions),
+- **`AGENTS.md`** — under [FlexTools Module Conventions](../../AGENTS.md#flextools-module-conventions),
   extend the existing "`__Template_converter_module.py` is the starting point" bullet to say it
   starts read-only and that writes are added deliberately. The `LexiconSetFieldText` bullet stays
   exactly as it is: it is a rule for modules generally, not for the template.

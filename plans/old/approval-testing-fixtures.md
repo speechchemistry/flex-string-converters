@@ -5,14 +5,14 @@ Status: proposed 2026-08-19, implemented 2026-08-19.
 ## Context
 
 Today the only tests for the Chao tone converter are inline parametrized assertions in
-[tests/test_chao_tones.py](../tests/test_chao_tones.py) against `convert()` and
+[tests/test_chao_tones.py](../../tests/test_chao_tones.py) against `convert()` and
 `extract_chao_letters()`. Two things are untested:
 
 - **The command line interface.** `SPEC.md` guarantees stdin-filter behaviour, argument order, and
   UTF-8 I/O regardless of console encoding; nothing exercises any of it.
 - **A corpus.** Adding a realistic multi-line sample today means hand-writing expected strings full
   of invisible combining marks — exactly the case [AGENTS.md's Testing
-  Approach](../AGENTS.md#testing-approach) says to switch to approval testing for.
+  Approach](../../AGENTS.md#testing-approach) says to switch to approval testing for.
 
 The user asked to explore the approval-testing setup used in
 [audio_label_file_conversions](https://github.com/speechchemistry/audio_label_file_conversions),
@@ -106,8 +106,8 @@ The helpers live in `tests/test_chao_tones_cli.py`, not a shared `tests/approval
 converter, and with no scrubbing there is little to share. Extract the module when a second converter
 needs the same loop.
 
-Modified: [.gitignore](../.gitignore), [AGENTS.md](../AGENTS.md), [README.md](../README.md).
-No change to [SPEC.md](../SPEC.md) — no specified behaviour changes.
+Modified: [.gitignore](../../.gitignore), [AGENTS.md](../../AGENTS.md), [README.md](../../README.md).
+No change to [SPEC.md](../../SPEC.md) — no specified behaviour changes.
 
 ## Implementation
 
@@ -199,7 +199,7 @@ precomposed/decomposed pair in `unicode_forms.txt`.
   written out, mirroring both reference repos' READMEs. Add "add fixtures under
   `tests/fixtures/<name>/`" as a step in *Writing a new converter*.
 - New skill `.claude/skills/adding-an-approval-fixture/SKILL.md`, listed in
-  [AGENTS.md's Skills section](../AGENTS.md#skills) (currently `_(none yet)_`): the occasional,
+  [AGENTS.md's Skills section](../../AGENTS.md#skills) (currently `_(none yet)_`): the occasional,
   task-triggered procedure for adding a fixture and promoting its first approval — the same role
   `adding-a-lift-field` plays in `lexicon_file_conversions`. Written to the Agent Skills format with
   only the six standard frontmatter fields, per that section's rules.

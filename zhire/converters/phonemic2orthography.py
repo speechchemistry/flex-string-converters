@@ -8,7 +8,7 @@
 #   tables. Tone diacritics are stripped on the way, since the orthography
 #   has no tone-marking convention yet. The segmental mapping itself is a
 #   finite-state transducer built with pynini. See
-#   plans/zhire-phonemic-to-orthography-fst.md for the design.
+#   plans/old/zhire-phonemic-to-orthography-fst.md for the design.
 #
 #   Tim Kempton
 #   August 2026
@@ -37,7 +37,7 @@ ATOMIC_CONSONANTS = {
 }
 
 # Sequences that can't be produced by concatenating the atomic consonants
-# above -- see plans/zhire-phonemic-to-orthography-fst.md's "Overrides"
+# above -- see plans/old/zhire-phonemic-to-orthography-fst.md's "Overrides"
 # section for why each one needs its own entry.
 OVERRIDES = {
     'dʒ': 'j',

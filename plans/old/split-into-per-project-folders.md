@@ -48,8 +48,8 @@ Three explicit choices made along the way:
 
 Two new skills were added to make the recurring procedures repeatable:
 
-- [`adding-a-project`](../.claude/skills/adding-a-project/SKILL.md) — scaffold a new project folder.
-- [`adding-a-flextools-module`](../.claude/skills/adding-a-flextools-module/SKILL.md) — wrap a
+- [`adding-a-project`](../../.claude/skills/adding-a-project/SKILL.md) — scaffold a new project folder.
+- [`adding-a-flextools-module`](../../.claude/skills/adding-a-flextools-module/SKILL.md) — wrap a
   converter in an existing project with a FlexTools module, from `__Template_converter_module.py`.
 
 ## What moved

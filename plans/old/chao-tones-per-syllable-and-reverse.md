@@ -110,13 +110,13 @@ New in `tests/test_diacritics2chao.py`, extending the existing `tone_diacritics_
 
 Synthetic `kai`-style forms are deliberate here: there are no attested diphthong forms to hand (see
 [Approval corpus](#approval-corpus)), and [AGENTS.md's Testing
-Approach](../AGENTS.md#testing-approach) wants a unit test to use whatever example shows its rule most
+Approach](../../AGENTS.md#testing-approach) wants a unit test to use whatever example shows its rule most
 clearly.
 
 ## Change 2: `converters/chao2diacritics.py`
 
 Plain Python 3, `regex` only, no `flextoolslib`; header block and CLI per [AGENTS.md's Converter
-Conventions](../AGENTS.md#converter-conventions).
+Conventions](../../AGENTS.md#converter-conventions).
 
 - `convert(input_string)` — the FLEx Process entry point; splits base text from the trailing
   tone-letter section, then delegates.
@@ -168,7 +168,7 @@ Conventions](../AGENTS.md#converter-conventions).
    A line that comes back still visibly carrying its tone letters is self-diagnosing — the entries that
    didn't convert are obvious and the data can be fixed. Best-effort output is plausible-looking
    tone-diacritic notation indistinguishable from correct data, which matters most if this ever writes to a FLEx field
-   (see [AGENTS.md's Data Safety](../AGENTS.md#data-safety)).
+   (see [AGENTS.md's Data Safety](../../AGENTS.md#data-safety)).
 
 **Command line** exactly as `diacritics2chao.py`'s: positional text or stdin lines, one result per line,
 results to stdout, diagnostics to stderr, `reconfigure(encoding="utf-8")` on both streams.
@@ -207,12 +207,12 @@ reverse corpus a genuine round-trip regression net rather than a fresh set of gu
 Approved files are produced *only* through the approval loop: run pytest, read each
 `received/*.received.txt`, check it against the original forward input, then run the `cp` command the
 failure prints — see the
-[`adding-an-approval-fixture`](../.claude/skills/adding-an-approval-fixture/SKILL.md) skill.
+[`adding-an-approval-fixture`](../../.claude/skills/adding-an-approval-fixture/SKILL.md) skill.
 
 **No diphthong fixture in either corpus for now.** There are no attested forms to hand, and after
 commit `3a10d15` the corpus takes real words rather than inventions, so diphthongs stay in the unit
 tests until real data exists. Recorded as a gap in [SPEC.md's Not Yet Specified
-section](../SPEC.md#not-yet-specified) so it isn't forgotten.
+section](../../SPEC.md#not-yet-specified) so it isn't forgotten.
 
 To avoid a second copy of the ~100-line harness, lift the reusable parts of
 `tests/test_diacritics2chao_cli.py` (`_input_fixtures`, `_promote_command`, `_assert_approved`, the
@@ -293,7 +293,7 @@ clean diphthong path.
 - `SPEC.md`, in change 2's converter section: the *implemented* behaviour — an unmapped contour is one
   of the bail-out conditions, with `ka ˨˩` as the example, and a sentence naming the 8 mappable
   contours so the limit is visible rather than surprising.
-- `SPEC.md`, [Not Yet Specified](../SPEC.md#not-yet-specified): one entry saying which rule will
+- `SPEC.md`, [Not Yet Specified](../../SPEC.md#not-yet-specified): one entry saying which rule will
   eventually replace the bail-out is undecided, listing options 2 and 3 in a line each with their
   trade-off (spelling changes vs. stacked marks).
 - This plan keeps the full discussion, as the historical record of why option 1 was chosen.

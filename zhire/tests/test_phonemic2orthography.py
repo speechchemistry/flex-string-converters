@@ -10,7 +10,7 @@
 #   in the approval corpus (tests/fixtures/phonemic2orthography/), built from
 #   99 real phonemic/orthographic pairs supplied by the language consultant
 #   (sample_phonemic2orthographic_data.csv) — see
-#   plans/zhire-phonemic-to-orthography-fst.md. A rule already demonstrated
+#   plans/old/zhire-phonemic-to-orthography-fst.md. A rule already demonstrated
 #   by a real word there isn't re-asserted here with the same word.
 #
 

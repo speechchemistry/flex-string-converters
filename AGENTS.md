@@ -56,6 +56,8 @@ Skills in this repository:
 - Keep re-syncing a plan while it is still being planned and implemented (see [Working Style](#working-style)). Once implementation is complete the plan freezes: don't rewrite it, renumber it, or restate later decisions inside it.
 - Give each plan a status line under its title recording when it was approved and whether it has been implemented, so a reader knows immediately whether it describes the present or the past.
 - When decisions changed after approval, append a short list of those changes to the end of the plan rather than editing the body. Appending keeps the record honest; editing destroys it.
+- **Move a plan to `plans/old/` once it is implemented**, so the top level of `plans/` shows only what is still in flight and nobody has to read status lines to tell the two apart. Move it with `git mv` so the rename stays visible in history. The move is the moment the plan freezes, so do it in the same change that finishes the implementation — an implemented plan left at the top level is the thing this rule exists to prevent, and `plans/` containing nothing but `old/` is the correct, honest state when no plan is in flight.
+- Moving a plan deepens it by one directory, so **fix its relative links in the same commit**: an up-one-level link target becomes up-two-levels. Also update anything pointing at the plan (a project's `SPEC.md`, a source-file comment). Repairing a link path is mechanical upkeep, not a rewrite, so it is not covered by the freeze rule above — but a link whose *target* has since been renamed or moved is part of the historical record and stays as written, per the "do not 'fix' the plan to match" rule.
 
 ## Markdown Conventions
 
@@ -68,7 +70,7 @@ Skills in this repository:
 - When behaviour changes are non-trivial, ask for confirmation before implementing.
 - If a requirement is ambiguous and could alter behaviour, ask a clarifying yes/no question first.
 - Ask clarifying questions in plain chat text, not via a multiple-choice/quick-answer UI widget.
-- Save non-trivial implementation plans to `plans/<descriptive-name>.md` in the repo (not only wherever the tool's own ephemeral plan-mode file lives), so they're preserved and reviewable via git history. This is not a one-time save: whenever the plan is revised (e.g. new information surfaces mid-planning), re-sync `plans/<name>.md` with the latest approved version before or immediately after implementation starts.
+- Save non-trivial implementation plans to `plans/<descriptive-name>.md` in the repo (not only wherever the tool's own ephemeral plan-mode file lives), so they're preserved and reviewable via git history. This is not a one-time save: whenever the plan is revised (e.g. new information surfaces mid-planning), re-sync `plans/<name>.md` with the latest approved version before or immediately after implementation starts. A plan stays at the top level of `plans/` only while it is in flight; once implemented it moves to `plans/old/` — see [Plans](#plans).
 
 ## Libraries And Dependencies
 
