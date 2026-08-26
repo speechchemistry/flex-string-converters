@@ -49,6 +49,7 @@ Skills in this repository:
 - [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) — add a new approval-test fixture (or approve a changed one) for a converter's CLI output.
 - [`adding-a-project`](.claude/skills/adding-a-project/SKILL.md) — scaffold a new project folder (`SPEC.md`, `converters/`, `tests/`) for a new converter or topic.
 - [`adding-a-flextools-module`](.claude/skills/adding-a-flextools-module/SKILL.md) — wrap an existing converter in a project with a FlexTools module, starting from `__Template_converter_module.py`.
+- [`checking-a-converter-against-its-source`](.claude/skills/checking-a-converter-against-its-source/SKILL.md) — reconcile a converter's mapping tables against the external document they were copied from, and build a fixture from that document.
 
 ## Plans
 
@@ -58,6 +59,16 @@ Skills in this repository:
 - When decisions changed after approval, append a short list of those changes to the end of the plan rather than editing the body. Appending keeps the record honest; editing destroys it.
 - **Move a plan to `plans/old/` once it is implemented**, so the top level of `plans/` shows only what is still in flight and nobody has to read status lines to tell the two apart. Move it with `git mv` so the rename stays visible in history. The move is the moment the plan freezes, so do it in the same change that finishes the implementation — an implemented plan left at the top level is the thing this rule exists to prevent, and `plans/` containing nothing but `old/` is the correct, honest state when no plan is in flight.
 - Moving a plan deepens it by one directory, so **fix its relative links in the same commit**: an up-one-level link target becomes up-two-levels. Also update anything pointing at the plan (a project's `SPEC.md`, a source-file comment). Repairing a link path is mechanical upkeep, not a rewrite, so it is not covered by the freeze rule above — but a link whose *target* has since been renamed or moved is part of the historical record and stays as written, per the "do not 'fix' the plan to match" rule.
+
+## External Specifications
+
+Some converters implement a correspondence table that a human wrote down elsewhere — an orthography statement, an IPA chart, a published standard. That document is the authority and the converter's tables are a copy of it, so treat the copying as a data migration rather than as reading comprehension. The full procedure is the [`checking-a-converter-against-its-source`](.claude/skills/checking-a-converter-against-its-source/SKILL.md) skill; the rules that always apply are here.
+
+- **Name the source document in the project's `SPEC.md`**, along with which of its tables the converter implements and any transliteration applied on the way in, so the copy can be re-derived when the document changes.
+- **Reconcile row counts, and account for every row of the source explicitly.** State the source's total, then place each row in exactly one bucket — implemented directly, produced by composing other entries, or deliberately out of scope with the reason given — and check the buckets sum to the total. A copy that silently drops a row leaves no hole to notice: a tidy table reads as complete precisely because nothing in it states what complete would be. Three Zhire phonemes went missing this way.
+- **Never assert that a row "falls out" of composing other entries — test it.** That claim costs a few lines of code to check and was false for two of the eleven rows it was claimed for.
+- **Name the artifact in any validation claim.** "Validated against every row" in a plan meant every row of a 99-word sample and was later read as every row of the specification. Write "99 of 99 rows of the sample corpus" or "all 32 consonant rows of the orthography statement" — never a bare "every row".
+- **A source-derived check is blind to gaps in the source itself.** Zhire's `/l/` was missing from the statement as well as the converter, and only real data could surface it. Source-derived fixtures and real or held-out data are complementary nets that fail in opposite directions; when a gap slips through, ask which net should have caught it.
 
 ## Markdown Conventions
 

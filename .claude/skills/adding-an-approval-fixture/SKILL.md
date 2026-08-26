@@ -39,7 +39,11 @@ the conventions this procedure follows, and `chao-tone-letters/tests/test_diacri
    approved file nobody looked at asserts nothing. Check it against the converter's `SPEC.md` entry,
    not just against what the code happens to currently do.
 6. If it's correct, run the promote command from the failure message. Do not write or copy the
-   approved file any other way — it must be produced by this loop, never hand-crafted.
+   approved file any other way — it must be produced by this loop, never hand-crafted. The one
+   exception is a fixture whose expected output comes from an external specification rather than
+   from the converter, where promoting would make the converter its own judge: see
+   [`checking-a-converter-against-its-source`](../checking-a-converter-against-its-source/SKILL.md)
+   and [AGENTS.md's Testing Approach](../../../AGENTS.md#testing-approach).
 7. Re-run `python -m pytest` and confirm it's green and the received file is gone.
 8. Check the new example isn't a duplicate. If it's illustrating a rule that already has a general
    unit test in `tests/test_<name>.py` (e.g. "an unrelated diacritic survives in the base text"), it
