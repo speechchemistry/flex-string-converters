@@ -40,10 +40,23 @@ ATOMIC_CONSONANTS = {
 # above -- see plans/old/zhire-phonemic-to-orthography-fst.md's "Overrides"
 # section for why each one needs its own entry.
 OVERRIDES = {
+    'tʃ': 'c',
     'dʒ': 'j',
+    # The prenasalised labial-velar. Its grapheme is ng + b, not ng + gb, so
+    # unlike the other prenasalised consonants (mb, nd, ngg) it can't fall out
+    # of concatenating its parts, which would give "ngmgb".
+    'ŋmɡb': 'ngb',
     'hw': 'wh',
     'ɕw': 'why',
     'ʑw': 'yh',
+}
+
+# Alternate input notations accepted for a phoneme already in the tables
+# above -- not distinct phonemes. [r] and [ɾ] are allophones and the data
+# writes /r/, but the orthography statement's phoneme column uses /ɾ/, so
+# both are accepted rather than erroring on the statement's own notation.
+INPUT_VARIANTS = {
+    'ɾ': 'r',
 }
 
 
@@ -58,6 +71,7 @@ def _build_token_pairs():
     pairs = [(phoneme, phoneme) for phoneme in VOWELS]
     pairs += list(ATOMIC_CONSONANTS.items())
     pairs += list(OVERRIDES.items())
+    pairs += list(INPUT_VARIANTS.items())
     pairs.append((' ', ' '))
     for vowel in VOWELS:
         pairs.append((vowel + NASAL_TILDE, vowel + NASAL_TILDE))
