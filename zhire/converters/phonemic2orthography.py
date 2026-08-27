@@ -30,21 +30,39 @@ VOWELS = ['a', 'e', 'ɛ', 'ə', 'i', 'o', 'ɔ', 'u']
 
 # Atomic consonants: one grapheme per phoneme, none decomposable further.
 ATOMIC_CONSONANTS = {
-    'b': 'b', 'd': 'd', 'f': 'f', 'ɡ': 'g', 'ɣ': 'gh', 'h': 'h', 'k': 'k',
-    'x': 'kh', 'l': 'l', 'm': 'm', 'n': 'n', 'ŋ': 'ng',
-    'p': 'p', 'r': 'r', 's': 's', 'ʃ': 'sh', 't': 't', 'v': 'v', 'w': 'w',
-    'j': 'y', 'z': 'z', 'ʒ': 'zh',
+    'b': 'b',
+    'd': 'd',
+    'f': 'f',
+    'ɡ': 'g',
+    'ɣ': 'gh',
+    'h': 'h',
+    'k': 'k',
+    'x': 'kh',
+    'l': 'l',
+    'm': 'm',
+    'n': 'n',
+    'ŋ': 'ng',
+    'p': 'p',
+    'r': 'r',
+    's': 's',
+    'ʃ': 'sh',
+    't': 't',
+    'v': 'v',
+    'w': 'w',
+    'j': 'y',
+    'z': 'z',
+    'ʒ': 'zh',
 }
 
 # Sequences that can't be produced by concatenating the atomic consonants
 # above -- see plans/old/zhire-phonemic-to-orthography-fst.md's "Overrides"
 # section for why each one needs its own entry.
+# The prenasalised labial-velar grapheme is ng + b, not ng + gb, so
+# unlike the other prenasalised consonants (mb, nd, ngg) it can't fall out
+# of concatenating its parts, which would give "ngmgb".
 OVERRIDES = {
     'tʃ': 'c',
     'dʒ': 'j',
-    # The prenasalised labial-velar. Its grapheme is ng + b, not ng + gb, so
-    # unlike the other prenasalised consonants (mb, nd, ngg) it can't fall out
-    # of concatenating its parts, which would give "ngmgb".
     'ŋmɡb': 'ngb',
     'hw': 'wh',
     'ɕw': 'why',
@@ -65,9 +83,7 @@ def _build_token_pairs():
     # dʒ -> j over d + ʒ -> dzh -- falls out of pynini.shortestpath on its
     # own: with every arc weighted equally it reaches the fewest-arc path
     # first, and fewest tokens across a fixed input length means longest
-    # tokens. Weighting by token length would not help, and is the tempting
-    # wrong fix: the input's length is the same however it is tokenised, so
-    # every tokenisation would sum to the same weight.
+    # tokens. 
     pairs = [(phoneme, phoneme) for phoneme in VOWELS]
     pairs += list(ATOMIC_CONSONANTS.items())
     pairs += list(OVERRIDES.items())
