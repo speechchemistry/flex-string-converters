@@ -71,6 +71,14 @@ def test_barred_i_becomes_schwa():
     assert convert("ɣɨɾ") == "ɣər"
 
 
+def test_near_close_near_front_i_becomes_i():
+    # [ɪ] and [i] are not distinguished at the phonemic level -- not
+    # stated anywhere in the phonology sketch's prose or charts, found
+    # only from the hidden test data. rɪ̄xí 'head' is a real attested
+    # word from that data, not a constructed example.
+    assert convert("rɪ̄xí") == "rīxí"
+
+
 def test_tie_bar_deletion_does_not_block_a_multi_character_token():
     # The bug an earlier draft of this plan shipped: putting the release-
     # mark deletions inside the FST as epsilon arcs let a tie bar sitting

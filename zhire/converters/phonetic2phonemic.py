@@ -70,6 +70,8 @@ OVERRIDES = {
     'nz': 'ndz',   # variant assertion 3, plain form, any position
     'ndʒ': 'ndz',  # variant assertion 4, plain form, any position
     'ɨ': 'ə',      # demonstrated by the sketch's own orthography chart
+    'ɪ': 'i',      # not in the sketch's own prose or charts, found only
+                   # from the hidden test data
 }
 
 # Marks the phonemic level doesn't carry -- release detail, not structure.
