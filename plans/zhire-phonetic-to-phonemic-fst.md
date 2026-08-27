@@ -1,6 +1,6 @@
 # Zhire phonetic-to-phonemic converter, built as a pynini FST
 
-Status: proposed 2026-08-27, revised twice 2026-08-27, not yet implemented. The rule set was extracted from the phonology sketch and prototyped against it (see [Prototype results](#prototype-results-measured-not-assumed)) — 47 of 47 orthography-chart rows run end to end, 44 matching the chart exactly and 3 exposing inconsistencies in the sketch itself. It was then checked against 246 real etic/emic word pairs the user supplied from FLEx (`phonetic2phonemic_public_test.csv`) — see [Validation against real held-out data](#validation-against-real-held-out-data) — which confirmed most of the rule set and supplied one rule the sketch never states (aspiration deletion). All six original open questions plus one raised by the real data are resolved — see [Decisions](#decisions-resolved-2026-08-27); only the fixture's file name and location (5a) is still a default — plus the user's calls (2026-08-27) that the sketch's `ʷ ʲ ᵐ ⁿ ᵑ` modifier letters are rejected outright rather than transliterated, and that `nz`/`ndʒ` → `ndz` applies to the plain sequences in any position. The FST architecture has since been built as a throwaway `pynini` lexicon and confirmed to reproduce the prototype's numbers exactly, so the split between FST and pre-processing is measured rather than proposed — including the user's explicit call (2026-08-27) to implement `[ɲ]` → `/nj/` as the sketch states it despite 3 real words disagreeing, and to keep all known-anomalous rows in the held-out fixture rather than hold them out or add rules around them. No converter, test or fixture file has been written yet.
+Status: proposed 2026-08-27, revised twice 2026-08-27, not yet implemented. The rule set was extracted from the phonology sketch and prototyped against it (see [Prototype results](#prototype-results-measured-not-assumed)) — 47 of 47 orthography-chart rows run end to end, 44 matching the chart exactly and 3 exposing inconsistencies in the sketch itself. It was then checked against 246 real etic/emic word pairs the user supplied from FLEx (`phonetic2phonemic_public_test.csv`) — see [Validation against real held-out data](#validation-against-real-held-out-data) — which confirmed most of the rule set and supplied one rule the sketch never states (aspiration deletion). All six original open questions plus one raised by the real data are resolved — see [Decisions](#decisions-resolved-2026-08-27); only the fixture's file name and location (5a) is still a default — plus the user's calls (2026-08-27) that the sketch's `ʷ ʲ ᵐ ⁿ ᵑ` modifier letters are rejected outright rather than transliterated, and that `nz`/`ndʒ` → `ndz` applies to the plain sequences in any position. The FST architecture has since been built as a throwaway `pynini` lexicon, which reproduced the prototype's numbers and also caught a real bug in an earlier draft: making the release-mark deletions epsilon arcs instead of a pre-pass silently breaks any multi-character token containing a tie bar. The split between FST and pre-processing is therefore measured rather than proposed — including the user's explicit call (2026-08-27) to implement `[ɲ]` → `/nj/` as the sketch states it despite 3 real words disagreeing, and to keep all known-anomalous rows in the held-out fixture rather than hold them out or add rules around them. No converter, test or fixture file has been written yet.
 
 ## Why
 
@@ -10,7 +10,7 @@ This plan adds `zhire/converters/phonetic2phonemic.py`, a second converter in th
 
 It is deliberately a *separate converter*, not an extension of `phonemic2orthography.py`, because the two answer different questions from different sources. `phonemic2orthography.py` implements the orthography statement's grapheme tables; this one implements the phonology sketch's allophony and notation. Keeping them apart means each has one source document to be reconciled against, which is what [AGENTS.md's External Specifications section](../AGENTS.md#external-specifications) asks for.
 
-Following its sibling, the segmental mapping is implemented **exclusively as a finite-state transducer using [pynini](https://pypi.org/project/pynini/)** — and more strictly so than the sibling: here the FST is the *only* place any mapping happens, with just NFD normalisation before it and NFC after. See [What `convert()` does](#what-convert-does-and-what-is-fst-versus-pre-processing).
+Following its sibling, the segmental mapping is implemented **exclusively as a finite-state transducer using [pynini](https://pypi.org/project/pynini/)**: every phoneme correspondence is an FST arc, wrapped in the same minimal Python that `phonemic2orthography.py` uses — normalise, strip a short enumerated list of release marks, run the machine, normalise back. See [What `convert()` does](#what-convert-does-and-what-is-fst-versus-pre-processing) for exactly which step lives where and why.
 
 ## Source of truth for the mapping
 
@@ -105,6 +105,8 @@ The cost is real: the phonology sketch *does* use this notation, in 11 of its 47
 ### Marks deleted
 
 These three are deleted rather than rejected, which is the opposite treatment from the modifier letters above. The line between them is whether the mark encodes a *structural interpretation* or just phonetic detail: `ⁿ` in `ⁿd` asserts a syllable analysis, whereas an ejective, a tie bar and an aspiration mark record how a segment was released and commit to nothing the phonemic level needs. Deleting them loses no analysis; accepting a superscript would import one.
+
+The deletion happens in a small Python pre-pass over an **enumerated** list of exactly these three, before anything reaches the FST — both halves of that matter, and [Why the release marks are stripped before the FST](#why-the-release-marks-are-stripped-before-the-fst) gives the reasons with the test results.
 
 | Mark | Why |
 | ---- | --- |
@@ -206,26 +208,43 @@ The same 'chin' morpheme surfaces as `[ⁿz]` on its own and as `[ⁿdz]` inside
 
 ## What `convert()` does, and what is FST versus pre-processing
 
-**The short version: only Unicode normalisation is Python. Every mapping decision lives in the FST.** That includes the rewrites, the deletions, the identity pass-throughs, and the rejection of anything unmapped. There is no pre-pass blocklist and no post-pass fix-up.
+**The split: Python does Unicode normalisation and deletes three release marks. The FST does every correspondence** — the rewrites, the identity pass-throughs, and the rejection of anything unmapped. There is no pre-pass blocklist and no post-pass fix-up.
 
 | # | Step | Where | Why there |
 | - | ---- | ----- | --------- |
-| 1 | Normalise to NFD | **Python pre-pass** | Canonical decomposition is not a token mapping, so it can't be an arc. It has to come first because the lexicon's arcs are defined over *decomposed* text — a base letter and each combining mark are separate symbols. Without it, precomposed input (`á` as `U+00E1`) matches no arc and would be rejected spuriously. |
-| 2 | `:` → `ː` (the source typo) | FST arc | It is a character correspondence like any other. Putting it in the lexicon keeps one place that rewrites characters instead of two. |
-| 3 | `nz` → `ndz`, `ndʒ` → `ndz` | FST arcs, multi-character | See the maximal-munch note below. |
-| 4 | `ɾ` → `r`, `r` → `r`, `ɨ` → `ə`, `ɲ` → `nj` | FST arcs | |
-| 5 | `ʼ`, `͡`, `ʰ` deleted | FST arcs to epsilon | Deleting is just an arc with an empty output; it needs no pre-pass. |
+| 1 | Normalise to NFD | **Python pre-pass** | Canonical decomposition is not a token mapping, so it can't be an arc. It must come first because the lexicon's arcs are defined over *decomposed* text — a base letter and each combining mark are separate symbols. Without it, precomposed input (`á` as `U+00E1`) matches no arc and would be rejected spuriously. |
+| 2 | Delete `ʼ`, `͡`, `ʰ` — **an enumerated three, never a category** | **Python pre-pass** | Must happen *before* tokenisation, for a correctness reason found by testing — see [Why the release marks are stripped before the FST](#why-the-release-marks-are-stripped-before-the-fst). |
+| 3 | `:` → `ː` (the source typo) | FST arc | A character correspondence like any other. Unlike the marks above it cannot occur inside a multi-character token — both tokens are consonant sequences and the colon is a length mark following a vowel — so it has no tokenisation interaction and belongs in the lexicon. |
+| 4 | `nz` → `ndz`, `ndʒ` → `ndz` | FST arcs, multi-character | See the maximal-munch note below. |
+| 5 | `ɾ` → `r`, `r` → `r`, `ɨ` → `ə`, `ɲ` → `nj` | FST arcs | |
 | 6 | Tone marks, `̃`, `ː`, space, and every phoneme letter kept as itself | FST identity arcs | Preserving a symbol is exactly what an identity arc does. |
-| 7 | Reject anything unmapped, raising `ValueError` | **Falls out of the FST** | Composing an input that contains an unmapped symbol yields an empty machine; `convert()` tests for that and raises. This is the *only* rejection mechanism — the modifier letters of [Modifier letters rejected](#modifier-letters-rejected-not-transliterated) are refused because the lexicon has no arc for them, not because a pre-pass screens for them. |
+| 7 | Reject anything unmapped, raising `ValueError` | **Falls out of the FST** | Composing an input containing an unmapped symbol yields an empty machine; `convert()` tests for that and raises. This is the *only* rejection mechanism — the modifier letters of [Modifier letters rejected](#modifier-letters-rejected-not-transliterated) are refused because the lexicon has no arc for them, not because a pre-pass screens for them. |
 | 8 | Normalise to NFC | **Python post-pass** | Unicode hygiene on the way out, matching the sibling converter's contract. |
 
-So steps 1 and 8 are the entire non-FST surface, and they are the same two steps the sibling converter wraps its own FST in.
+This gives the converter the same shape as `phonemic2orthography.py` — normalise, strip marks, run the FST, normalise back — which is the more familiar arrangement as well as the correct one.
 
-**This is a cleaner split than `phonemic2orthography.py`'s**, which additionally strips combining marks in a Python pre-pass (`_strip_tone_diacritics`). That converter can't avoid it: it *deletes* marks by a general Unicode-category rule ("every `Mn` except the tilde"), which is a predicate over character classes rather than an enumerable set of arcs. This converter *preserves* marks, and enumerating the 10 tone marks as identity arcs is straightforward, so nothing needs to happen outside the machine.
+### Why the release marks are stripped before the FST
 
-**Maximal munch.** Exactly two tokens are multi-character, `nz` and `ndʒ`, and each must beat its single-character parts — which maximal munch gives for free; the sibling converter's [correction 2](old/zhire-phonemic-to-orthography-fst.md#corrections-found-after-implementation) records where that behaviour actually comes from, and the same unweighted construction applies here. **Checked rather than assumed, per [AGENTS.md](../AGENTS.md#external-specifications) on not claiming a row "falls out":** every other multi-letter sequence does fall out of the per-character arcs — `ndz` passes through unchanged, and `ɕw`, `ʑw`, `hw`, `ŋmɡb` are just their plain letters concatenated. Worth stating because `ndz` and `ndʒ` differ by one letter and only the second needs an entry: `ndz` must fall through untouched while `ndʒ` is rewritten.
+An earlier draft of this plan made these three deletions epsilon arcs inside the lexicon, on the grounds that it kept everything in one place. **Testing showed that is wrong, and wrong in the worst way — it fails silently.** A mark sitting *inside* a multi-character token prevents that token from matching, so the rule simply doesn't fire and a plausible-looking wrong answer comes out:
 
-**Verified, not designed on paper.** The whole architecture above was built as a throwaway `pynini` lexicon and run against both corpora, and it reproduces the character-map prototype's numbers exactly — 240 of 246 real rows with **0 raises**, and 44 of 47 sketch chart rows. Specifically confirmed: rejection really does fall out of the empty-machine check (`hʷók`, `ᵐbaŋ`, `tʲɛɾ`, `ᵑɡēj`, and non-Zhire `q` / `ʈʂa` all raise with no pre-check present); `:` works as an arc (`dzu᷈:ŋ` → `dzu᷈ːŋ`); the epsilon arcs delete correctly (`k͡pár` → `kpár`, `tsʼēn` → `tsēn`, `sīsʰi᷆p` → `sīsi᷆p`); and tone marks survive a `utf8`-token lexicon byte-identical.
+| Input | Deletions as epsilon arcs | Deletions as a pre-pass |
+| ----- | ------------------------- | ----------------------- |
+| `ndʒa` | `ndza` ✓ | `ndza` ✓ |
+| `nd͡ʒa` (tie-barred affricate) | `ndʒa` ✗ **silently wrong** | `ndza` ✓ |
+| `nza` | `ndza` ✓ | `ndza` ✓ |
+| `n͡za` | `nza` ✗ **silently wrong** | `ndza` ✓ |
+
+This is not hypothetical: `d͡ʒ` with a tie bar is ordinary IPA practice for an affricate, and the sketch already uses tie bars elsewhere (`k͡pōtòŋ`, `k͡pɔ̄ɾí`). Stripping the marks first makes the multi-character tokens robust to them, and there is no case where it does harm — a deleted mark cannot affect a match it was never part of.
+
+**The enumeration is load-bearing.** The pre-pass must delete exactly `ʼ`, `͡` and `ʰ` by name, *not* by a Unicode-category rule such as "every combining mark". That distinction is what preserves the raise-on-unknown guarantee, and it is precisely where `phonemic2orthography.py` has a documented regret: its general "every `Mn` except the tilde" pre-pass silently drops the ring from `ŋ̊`, which its own `SPEC.md` records as the one exception to that converter's never-silently-drop-anything rule. Verified that the enumerated version here does not inherit that flaw — `ŋ̊a` still raises, as do `aˀ`, `q` and `ʈʂa`.
+
+### Maximal munch
+
+Exactly two tokens are multi-character, `nz` and `ndʒ`, and each must beat its single-character parts — which maximal munch gives for free; the sibling converter's [correction 2](old/zhire-phonemic-to-orthography-fst.md#corrections-found-after-implementation) records where that behaviour actually comes from, and the same unweighted construction applies here. **Checked rather than assumed, per [AGENTS.md](../AGENTS.md#external-specifications) on not claiming a row "falls out":** every other multi-letter sequence does fall out of the per-character arcs — `ndz` passes through unchanged, and `ɕw`, `ʑw`, `hw`, `ŋmɡb` are just their plain letters concatenated. Worth stating because `ndz` and `ndʒ` differ by one letter and only the second needs an entry: `ndz` must fall through untouched while `ndʒ` is rewritten.
+
+### Verified, not designed on paper
+
+The architecture above was built as a throwaway `pynini` lexicon and run against both corpora in both arrangements. Both reach the same totals — 240 of 246 real rows with **0 raises**, and 44 of 47 sketch chart rows — so the pre-pass change costs no coverage and is a pure correctness gain on the tie-bar cases, which neither corpus happens to contain. Also confirmed: rejection really does fall out of the empty-machine check with no pre-check present (`hʷók`, `ᵐbaŋ`, `tʲɛɾ`, `ᵑɡēj`, `q`, `ʈʂa` all raise); `:` works as an arc (`dzu᷈:ŋ` → `dzu᷈ːŋ`); the deletions work (`k͡pár` → `kpár`, `tsʼēn` → `tsēn`, `sīsʰi᷆p` → `sīsi᷆p`); and tone marks survive a `utf8`-token lexicon byte-identical.
 
 **Not part of `convert()` at all.** Two transformations in this plan happen when a *fixture* is built, never at conversion time, and it's worth being explicit since both look like mapping rules: transliterating the sketch's modifier letters to plain notation ([Testing](#testing)), and stripping the `**` from the `ɡo᷅r**` row. `convert()` would raise on both inputs, by design.
 
