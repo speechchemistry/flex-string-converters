@@ -14,6 +14,8 @@
 #   with the same word.
 #
 
+import unicodedata
+
 import pytest
 
 from phonetic2phonemic import convert
@@ -91,6 +93,30 @@ def test_tone_marks_are_preserved():
     # The phonemic form stays tonal: stripping tone is
     # phonemic2orthography.py's job, at the end of the chain.
     assert convert("pá") == "pá"
+
+
+@pytest.mark.parametrize("mark", [
+    "\u030B",  # ő
+    "\u0301",  # ó
+    "\u0304",  # ō
+    "\u0300",  # ò
+    "\u030F",  # ȍ
+    "\u030C",  # ǒ
+    "\u0302",  # ô
+    "\u1DC4",  # o᷄
+    "\u1DC5",  # o᷅
+    "\u1DC8",  # o᷈
+    "\u1DC6",  # o᷆
+    "\u1DC7",  # o᷇
+    "\u1DC9",  # o᷉
+])
+def test_every_ipa_tone_diacritic_is_preserved(mark):
+    # The full IPA set of 13, not only the 10 the phonology sketch happens
+    # to use -- the same table chao-tone-letters/converters/diacritics2chao.py
+    # carries. A mark the draft sketch hasn't needed yet is a gap in the
+    # sketch, not a tone the phonemic level can't represent, so accepting it
+    # costs nothing and raising on it would reject valid IPA.
+    assert convert("po" + mark) == unicodedata.normalize("NFC", "po" + mark)
 
 
 def test_nasalisation_tilde_is_preserved():

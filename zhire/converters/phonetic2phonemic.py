@@ -24,21 +24,29 @@ import unicodedata
 import pynini
 
 
-# The sketch's 10 tone marks, kept as identity arcs -- tone stays in the
-# phonemic form; stripping it is phonemic2orthography.py's job. Written as
-# \uXXXX escapes rather than the bare combining characters, which render as
-# invisible or unclear without a base letter to attach to.
+# The IPA's 13 tone diacritics, kept as identity arcs -- tone stays in the
+# phonemic form; stripping it is phonemic2orthography.py's job. The full
+# set, not just the 10 the phonology sketch happens to use: the sketch is a
+# draft, so a mark it hasn't needed yet is a gap in the sketch rather than a
+# tone the phonemic level can't carry. Same table, in the same order, as
+# chao-tone-letters/converters/diacritics2chao.py. Written as \uXXXX escapes
+# rather than bare combining characters, which render as invisible or
+# unclear with no base letter to attach to; each line's comment shows the
+# mark on an o.
 TONE_MARKS = [
-    '\u0300',  # grave
-    '\u0301',  # acute
-    '\u0302',  # circumflex
-    '\u0304',  # macron
-    '\u030C',  # caron
-    '\u1DC4',  # macron-acute
-    '\u1DC5',  # grave-macron
-    '\u1DC6',  # macron-grave
-    '\u1DC7',  # acute-macron
-    '\u1DC8',  # grave-acute-grave
+    '\u030B',  # ő
+    '\u0301',  # ó
+    '\u0304',  # ō
+    '\u0300',  # ò
+    '\u030F',  # ȍ
+    '\u030C',  # ǒ
+    '\u0302',  # ô
+    '\u1DC4',  # o᷄
+    '\u1DC5',  # o᷅
+    '\u1DC8',  # o᷈
+    '\u1DC6',  # o᷆
+    '\u1DC7',  # o᷇
+    '\u1DC9',  # o᷉
 ]
 NASAL_TILDE = '\u0303'  # combining tilde
 LENGTH_MARK = 'ː'  # U+02D0 -- a spacing modifier letter, not combining, so it renders fine on its own
