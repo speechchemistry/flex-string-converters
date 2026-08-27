@@ -65,14 +65,49 @@ Example: `hwōrì` → `whori` (tone stripped, `hw` override applied). `ɔ̃ː` 
 
 **Dependencies.** Python 3 and the `pynini` package.
 
+## Phonetic Transcription To Phonemic Transcription
+
+Converter: `converters/phonetic2phonemic.py`. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency. Turns a Zhire `[zhi]` phonetic transcription into the phonemic transcription `phonemic2orthography.convert()` already accepts, so the two compose: phonetic → phonemic → orthography.
+
+Source documents: `zhi_phonology_sketch_extracted.md` (on the NRG Language Drive, pandoc-extracted from the Zhire phonology sketch draft), for the allophony and notation rules, and `phonetic2phonemic_public_test.csv` (supplied directly by the user), 246 real phonetic/phonemic word pairs from a FLEx export, used as held-out validation and as the `real_flex_export` fixture below. See `plans/old/zhire-phonetic-to-phonemic-fst.md` for the full design and the evidence behind each rule.
+
+**Transform of `convert()`.**
+
+1. The input is normalised to NFD, so a base letter and each combining mark are separate code points.
+2. Three release marks — the ejective `ʼ` (`U+02BC`), the tie bar `͡` (`U+0361`), and aspiration `ʰ` (`U+02B0`) — are deleted, by name rather than by a general Unicode-category rule. They record how a segment was released, not a structural distinction the phonemic level needs. This must happen before tokenisation: doing it as part of the token lexicon instead was tried and found to fail silently, since a mark sitting inside a multi-character token (e.g. a tie bar in `n͡za`) blocks that token from matching and the surrounding rule doesn't fire.
+3. The stripped string is matched against a token lexicon using a finite-state transducer (built with [pynini](https://pypi.org/project/pynini/)), tokenised by maximal munch:
+   - The 8 vowels and the atomic consonants (including `/l/`, `/ɕ/` and `/ʑ/`) each map to themselves.
+   - `ɾ` and `r` both map to `r` — they are the same phoneme, and real data writes `/r/` while the phonology sketch's own notation uses `/ɾ/`.
+   - `ɨ` maps to `ə` — demonstrated by the phonology sketch's own orthography chart (`/ɣ/`'s example `[ɣɨɾ]` is spelled `ghər`), though not stated anywhere in its prose.
+   - `ɲ` maps to `nj` — the phonology sketch states this as a reanalysis, but the split is not clean in practice: the real FLEx export has three words with phonemic `ɲ` and eleven with phonemic `nj`, never conflated. The rule is implemented as the sketch states it, so those three words are expected to fail the `real_flex_export` fixture until their FLEx entries are corrected.
+   - `nz` and `ndʒ` both map to `ndz`, in any position — the phonology sketch documents `[ⁿdz]`, `[ⁿz]` and `[ⁿdʒ]` as one phoneme (backed by a morphological argument: the same 'chin' morpheme surfaces as `[ⁿz]` alone and `[ⁿdz]` in the compound word for 'beard'). The rule is applied to the plain letter sequences rather than the sketch's superscript notation — see the next point — and in every position rather than only word-initially, since the syllable-structure analysis that would justify a positional restriction hasn't been settled.
+   - A space maps to itself (kept as a word divider), and all 10 of the sketch's tone marks, the nasalisation tilde (`U+0303`), and the IPA length mark `ː` (`U+02D0`) each map to themselves.
+4. Any input containing a symbol, or sequence of symbols, not covered by the token lexicon causes `convert()` to raise `ValueError` naming the offending input, matching `phonemic2orthography.py`'s contract. This includes the phonology sketch's `Cʷ`/`Cʲ`/`ᵑ`/`ᵐ`/`ⁿ` modifier-letter notation, which is **rejected rather than transliterated** — unlike its sibling converter's step 3, this is a deliberate choice, not a gap. Real data doesn't use this notation (0 of 246 rows in the FLEx export), and the notation itself asserts a syllable-structure interpretation (that a nasal belongs to a prenasalised onset rather than a preceding syllable's coda) that hasn't been settled for Zhire; accepting it would commit the converter to an analysis its own source document hasn't finished.
+5. The result is normalised to NFC before being returned.
+
+Example: `ɲápsə́` → `njápsə́` (reanalysis applied). `nd͡ʒa` → `ndza` (tie bar deleted, then the plain-form rule fires). `hʷók` raises (modifier-letter notation rejected).
+
+**Command line.** Same shape as `phonemic2orthography.py`: text given as arguments is converted one result per line, in the order given; with no arguments the converter reads standard input line by line and writes one converted line per input line. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
+
+**Test fixtures.** Three kinds:
+
+- `phonology_sketch_examples` is spec-derived from the phonology sketch's three orthography charts: one line per chart row, using each row's phonetic example word as input. Both sides are derived independently of the converter, following the same reasoning as `orthography_statement_phonemes` above. The sketch's modifier letters are transliterated to plain notation on the way in (`ᵐb` to `mb`, `ᵑᵐɡb` to `ŋmɡb`, `tʲ` to `tj`, and so on — affecting 11 of the 47 rows), since `convert()` rejects that notation; re-derive it whenever the sketch's charts change.
+- `phonology_sketch_words` is a breadth net: the sketch's other bracketed example forms (its near-minimal sets, variant examples, and isolated phone citations), 136 words after the 47 chart rows are excluded, transliterated the same way. There is no independent ground truth for these, so it is an ordinary promote-loop fixture.
+- `real_flex_export` is spec-derived from `phonetic2phonemic_public_test.csv`'s own etic and emic columns — 246 real word pairs, independently elicited, not the converter's own output. One correction is applied when the fixture is built: the `ɡo᷅r**` ('payment') row's `**` (FLEx annotation noise on both columns, not phonemic content) is stripped from both sides. **6 rows are deliberately kept as known, expected mismatches** rather than held out — the 3 `ɲ`/`nj` words above, and 2 further rows (`kɨ́kjōɾākàp` 'river molluscs; shells', where the etic and emic look like different transcriptions of the word rather than two levels of one, and `kɨ́ɾ wèɡbī` 'water yam', whose etic likely should have used `ɨ` rather than `e`, going by the corpus's own `wɨ̀ɡbī` → `wə̀ɡbī` 'dog'). All 6 are data issues to be corrected in FLEx, not gaps in the converter, and the fixture fails until they are.
+
+**Dependencies.** Python 3 and the `pynini` package.
+
 ## Not Yet Specified
 
 Behaviours that are not pinned down yet. Add to the sections above as each is settled or implemented, rather than speculating here.
 
-- Phonetic input. `convert()` takes phonemic input, so the orthography statement's worked examples — which are phonetic — are not valid input as written. Three allophone correspondences were observed while checking them against the statement and are **not implemented or confirmed**: `[ɨ]` for `/ə/`, `[ɛ]` for `/e/` in a closed syllable, and a `[j]` offglide for `/i/`. Accepting phonetic input would be a separate feature, and would need those rules settled first.
+- `phonemic2orthography.convert()` itself still takes only phonemic input; `phonetic2phonemic.py` above is what closes the "phonetic input" gap previously noted here, by composing in front of it rather than extending it. Of the three allophone correspondences that section used to list as unconfirmed: `[ɨ]` for `/ə/` is now implemented and confirmed (by the phonology sketch's own orthography chart); `[ɛ]` for `/e/` in a closed syllable is now confirmed **not** to be a rule — the sketch's own chart writes closed-syllable `[ɛ]` as `ɛ` in two rows and only one row, `[ⁿdɛ̀n]` → `nden`, writes it `e`, and that row is a source error (see `plans/old/zhire-phonetic-to-phonemic-fst.md`'s Prototype results section); a `[j]` offglide for `/i/` is still open.
+- `phonetic2phonemic.convert()` does not model `/ʒ/`'s free variation with `[j]` — the phonology sketch asserts both that they contrast (`[ja᷆ː]` 'mother' vs `[ʒa᷆ː]` 'monitor lizard') and that they vary freely (`[jɛ᷆ŋ]` 'sheep' vs `[ʒɛ᷆ŋ]` 'ewe'), which a transducer can't encode both of at once without merging a real contrast. `[j]` maps to `/j/` and `[ʒ]` to `/ʒ/`; the free variation is simply not modelled.
+- `phonemic2orthography.convert()` does not accept literal `/ɲ/` — real data confirms this is not merely theoretical, since the FLEx export's own emic (phonemic) field contains `ɲ` in 3 words. The composed chain never hits this, because `phonetic2phonemic.convert()` maps `ɲ` to `nj` first, which `phonemic2orthography.convert()` already accepts. But feeding a phonemic field containing literal `ɲ` straight to `phonemic2orthography.convert()`, bypassing `phonetic2phonemic.py`, still hits it today.
+- `phonetic2phonemic.convert()` only strips the specific `**` annotation pattern found in one row of `real_flex_export`, by correcting the fixture rather than by a general rule; other FLEx annotation conventions in future exports are not handled and would need the same fixture-time treatment or a converter change, whichever the pattern turns out to warrant.
 - Syllabic nasals, beyond the ones already in the consonant table above.
 - General morphophonological rules (nasal assimilation, vowel harmony, word-boundary coalescence).
 - Tone *marking* in the orthography — tone is stripped, not re-marked, since there is currently no orthographic tone convention to re-mark it with.
 - Capitalisation and punctuation conventions, including hyphens.
-- The orthography statement's `Cʷ`/`Cʲ`/`ᵑ`/`ᵐ`/`ⁿ` modifier-letter notation, until real phonemic data actually uses it.
-- A FlexTools module wrapping this converter. `pynini` doesn't support the Python .NET/IronPython runtime FlexTools modules run under on Windows, so none is planned.
+- The orthography statement's `Cʷ`/`Cʲ`/`ᵑ`/`ᵐ`/`ⁿ` modifier-letter notation, until real phonemic data actually uses it. `phonetic2phonemic.py`'s corresponding phonology-sketch notation is rejected outright rather than left pending, per that section above.
+- A FlexTools module wrapping either converter. `pynini` doesn't support the Python .NET/IronPython runtime FlexTools modules run under on Windows, so none is planned for either.

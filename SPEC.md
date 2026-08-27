@@ -7,4 +7,4 @@ This file records only projects that exist today. Add a new entry once a project
 ## Projects
 
 - [`chao-tone-letters/SPEC.md`](chao-tone-letters/SPEC.md) — converting between tone diacritics and Chao tone letters, and extracting Chao tone letters into a FLEx `Pitch` field. Not specific to any one language.
-- [`zhire/SPEC.md`](zhire/SPEC.md) — converting a Zhire `[zhi]` phonemic transcription to its orthographic spelling.
+- [`zhire/SPEC.md`](zhire/SPEC.md) — converting a Zhire `[zhi]` phonetic or phonemic transcription to its orthographic spelling.

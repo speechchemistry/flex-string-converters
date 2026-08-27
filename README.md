@@ -60,8 +60,28 @@ The `Pitch` field should show that same default vernacular writing system, becau
 
 ## `zhire/`
 
-Converting a Zhire `[zhi]` phonemic transcription to its orthographic spelling, per the Zhire
-orthography statement.
+Converting a Zhire `[zhi]` phonetic or phonemic transcription to its orthographic spelling. The two
+converters compose: phonetic → phonemic → orthography.
+
+### `zhire/converters/phonetic2phonemic.py`
+
+`convert()` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic
+transcription into the phonemic transcription `phonemic2orthography.py` accepts, using a finite-state
+transducer, e.g. `ɲápsə́` → `njápsə́`.
+
+```
+$ echo 'ɲápsə́' | python3 zhire/converters/phonetic2phonemic.py
+njápsə́
+
+$ python3 zhire/converters/phonetic2phonemic.py 'ɲápsə́' 'nd͡ʒa'
+njápsə́
+ndza
+```
+
+An input symbol or sequence the mapping doesn't cover raises an error naming the offending input,
+rather than passing it through unchanged or dropping it silently — this includes the phonology
+sketch's own `Cʷ`/`Cʲ`/`ᵑ`/`ᵐ`/`ⁿ` modifier-letter notation, which is rejected outright since it
+asserts a syllable-structure interpretation that hasn't been settled for Zhire.
 
 ### `zhire/converters/phonemic2orthography.py`
 
@@ -81,10 +101,10 @@ whori
 An input symbol or sequence the mapping doesn't cover raises an error naming the offending input,
 rather than passing it through unchanged or dropping it silently.
 
-It needs Python 3 and the `pynini` package (`pip install pynini`). `pynini` has prebuilt wheels for
-Linux; macOS and Windows need conda-forge instead, and Windows has no native wheel at all — install
-via WSL there. There is no FlexTools module for this converter: FlexTools modules run under Python
-.NET/IronPython on Windows, which `pynini` does not support.
+Both converters need Python 3 and the `pynini` package (`pip install pynini`). `pynini` has prebuilt
+wheels for Linux; macOS and Windows need conda-forge instead, and Windows has no native wheel at all —
+install via WSL there. There is no FlexTools module for either converter: FlexTools modules run under
+Python .NET/IronPython on Windows, which `pynini` does not support.
 
 ## `__Template_converter_module.py`
 
