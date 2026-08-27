@@ -1,6 +1,6 @@
 # Zhire phonetic-to-phonemic converter, built as a pynini FST
 
-Status: proposed 2026-08-27, revised twice 2026-08-27, not yet implemented. The rule set was extracted from the phonology sketch and prototyped against it (see [Prototype results](#prototype-results-measured-not-assumed)) — 47 of 47 orthography-chart rows run end to end, 44 matching the chart exactly and 3 exposing inconsistencies in the sketch itself. It was then checked against 246 real etic/emic word pairs the user supplied from FLEx (`phonetic2phonemic_public_test.csv`) — see [Validation against real held-out data](#validation-against-real-held-out-data) — which confirmed most of the rule set and supplied one rule the sketch never states (aspiration deletion). All six original open questions plus one raised by the real data are resolved — see [Decisions](#decisions-resolved-2026-08-27); only the fixture's file name and location (5a) is still a default — including the user's explicit call (2026-08-27) to implement `[ɲ]` → `/nj/` as the sketch states it despite 3 real words disagreeing, and to keep all known-anomalous rows in the held-out fixture rather than hold them out or add rules around them. No converter, test or fixture file has been written yet.
+Status: proposed 2026-08-27, revised twice 2026-08-27, not yet implemented. The rule set was extracted from the phonology sketch and prototyped against it (see [Prototype results](#prototype-results-measured-not-assumed)) — 47 of 47 orthography-chart rows run end to end, 44 matching the chart exactly and 3 exposing inconsistencies in the sketch itself. It was then checked against 246 real etic/emic word pairs the user supplied from FLEx (`phonetic2phonemic_public_test.csv`) — see [Validation against real held-out data](#validation-against-real-held-out-data) — which confirmed most of the rule set and supplied one rule the sketch never states (aspiration deletion). All six original open questions plus one raised by the real data are resolved — see [Decisions](#decisions-resolved-2026-08-27); only the fixture's file name and location (5a) is still a default — plus the user's call (2026-08-27) that the `nz`/`ndʒ` → `ndz` rules apply to the plain letter sequences in any position, not only to the sketch's superscript notation — including the user's explicit call (2026-08-27) to implement `[ɲ]` → `/nj/` as the sketch states it despite 3 real words disagreeing, and to keep all known-anomalous rows in the held-out fixture rather than hold them out or add rules around them. No converter, test or fixture file has been written yet.
 
 ## Why
 
@@ -60,8 +60,8 @@ Four come from `variant:` cells in the phone relationship charts, two from prose
 | - | --------- | ----- | ---- |
 | 1 | `/ɾ/` is realised `[ɾ]` or `[r]` | `@ex:free_variation_ɾ_r` | `r` → `r` (see [Decisions](#decisions-resolved-2026-08-27) item 1 on the output symbol) |
 | 2 | `/ts/` is realised `[ts]` or `[tsʼ]` | `@ex:free_variation_ts_ts` | delete `ʼ` (`U+02BC`) |
-| 3 | `[ⁿdz]` and `[ⁿz]` are variants of one phoneme | `@ex:variant_ⁿdz_ⁿz` | `ⁿz` → `ndz` |
-| 4 | `[ⁿdʒ]` is a rare dialectal variant of `/ⁿdz/` | prose, Orthography section | `ⁿdʒ` → `ndz` |
+| 3 | `[ⁿdz]` and `[ⁿz]` are variants of one phoneme | `@ex:variant_ⁿdz_ⁿz` | `ⁿz` and plain `nz` → `ndz`, in any position |
+| 4 | `[ⁿdʒ]` is a rare dialectal variant of `/ⁿdz/` | prose, Orthography section | `ⁿdʒ` and plain `ndʒ` → `ndz`, in any position |
 | 5 | `[ɲ]` was reanalysed as `[nʲ]` | prose, "Contrast between nasal consonants" | `ɲ` → `nj` |
 | 6 | `/ʒ/` is realised `[ʒ]` or `[j]` | `@ex:free_variation_ʒ_j` | **not implementable — excluded, see below** |
 
@@ -80,7 +80,7 @@ By contrast, the third rule `zhire/SPEC.md` lists as observed-but-unconfirmed �
 
 ## The mapping
 
-Everything below is a flat symbol-level mapping — no context-dependent rewrite rules are needed, which is why a token lexicon plus maximal munch (the architecture `phonemic2orthography.py` already uses) is sufficient.
+Everything below is a flat symbol-level mapping — no context-dependent rewrite rules are needed, which is why a token lexicon plus maximal munch (the architecture `phonemic2orthography.py` already uses) is sufficient. This is partly a consequence of a deliberate choice rather than a given: the one rule with a plausible positional condition, `nz → ndz`, is applied in all positions instead, for the reasons in [Why the plain forms are covered too](#why-the-plain-forms-are-covered-too).
 
 ### Modifier letters transliterated to plain letters
 
@@ -103,7 +103,9 @@ Everything below is a flat symbol-level mapping — no context-dependent rewrite
 | `ɨ` | `ə` | demonstrated by @tbl:consonant_graphemes |
 | `ɲ` | `nj` | variant assertion 5 — known to conflict with some real data; see [Validation against real held-out data](#validation-against-real-held-out-data) |
 | `ⁿz` | `ndz` | variant assertion 3 |
+| `nz` | `ndz` | variant assertion 3, plain form — any position; see [Why the plain forms are covered too](#why-the-plain-forms-are-covered-too) |
 | `ⁿdʒ` | `ndz` | variant assertion 4 |
+| `ndʒ` | `ndz` | variant assertion 4, plain form — any position; no data exercises this row either way |
 
 ### Marks deleted
 
@@ -145,21 +147,24 @@ The 3 mismatches all look like inconsistencies **in the sketch**, each contradic
 
 The user supplied `phonetic2phonemic_public_test.csv`, a 246-row FLEx export with an etic (`zhi-fonipa-x-etic`) and an emic (`zhi-fonipa-x-emic`) column for the same 246 words — real elicited data, independent of the phonology sketch, and exactly the kind of held-out net [AGENTS.md](../AGENTS.md#external-specifications) asks for: "source-derived fixtures and real or held-out data are complementary nets that fail in opposite directions." Naming the artifact: all 246 rows have both columns filled; none were dropped as unusable.
 
-Running the etic column through the rule set in [The mapping](#the-mapping) and comparing to the emic column: **241 of 246 exact matches.** Reconciling all 246 rather than quoting the headline number, since the buckets are what show which rules are actually load-bearing:
+Running the etic column through the rule set in [The mapping](#the-mapping) and comparing to the emic column: **240 of 246 exact matches.** Reconciling all 246 rather than quoting the headline number, since the buckets are what show which rules are actually load-bearing:
 
 | Bucket | Rows | |
 | ------ | ---- | - |
 | Two columns already identical, and still match | 178 | no rule needed |
-| Differ, explained by `ɾ → r` alone | 58 | the single most load-bearing rule in the whole set |
+| Differ, explained by `ɾ → r` alone | 57 | the single most load-bearing rule in the whole set |
 | Differ, additionally need `ɨ → ə` | 4 | |
 | Differ, additionally need `ʰ` deleted | 1 | the rule the sketch never states — see below |
-| **Match subtotal** | **241** | |
-| Identical columns *broken* by `ɲ → nj` | 3 | the rule implemented against real data, per [Decisions](#decisions-resolved-2026-08-27) item 7 |
+| **Match subtotal** | **240** | |
+| Identical columns *broken* by `ɲ → nj` | 3 | the rule implemented against the real data, per [Decisions](#decisions-resolved-2026-08-27) item 7 |
+| Differ, and `nz → ndz` makes them differ *more* | 1 | 'chin'; see [Why the plain forms are covered too](#why-the-plain-forms-are-covered-too) |
 | Differ, unexplained by any rule — data anomalies | 2 | |
-| **Mismatch subtotal** | **5** | |
+| **Mismatch subtotal** | **6** | |
 | **Total** | **246** | |
 
-Worth being precise about the `ɲ → nj` bucket, because the headline framing hides it: those 3 rows have *identical* etic and emic columns, so they would match trivially under an identity rule. It is applying assertion 5 that breaks them. So the rule set's 5 failures are not 5 rows it fails to explain — they are 2 genuine data anomalies plus 3 rows it actively changes against the evidence, by explicit decision.
+Cross-checking the two ways of slicing it: 181 rows have identical columns (178 match, 3 broken by `ɲ → nj`) and 65 differ (62 explained by the three rules above, 3 not — 'chin' plus the 2 anomalies). 178 + 62 = 240 matches; 3 + 3 = 6 mismatches.
+
+Worth being precise about the `ɲ → nj` bucket, because the headline framing hides it: those 3 rows have *identical* etic and emic columns, so they would match trivially under an identity rule. It is applying assertion 5 that breaks them. So the rule set's 6 failures are not 6 rows it fails to explain — they are 2 genuine data anomalies plus 4 rows it actively changes against what the emic field currently says, by explicit decision in both cases (3 for `ɲ → nj`, 1 for `nz → ndz`).
 
 None of the sketch's modifier letters (`ʷ ʲ ᵐ ⁿ ᵑ`) appear anywhere in the etic column — confirming the user's report that this notation isn't used in practice — and neither does the ejective mark or the tie bar. Those parts of [The mapping](#the-mapping) are therefore entirely untested by this corpus, kept for compatibility with the sketch's own notation rather than dropped. The plain `r` identity rule, by contrast, does get exercised: 13 rows carry a literal `r` in the etic column.
 
@@ -167,7 +172,7 @@ None of the sketch's modifier letters (`ʷ ʲ ᵐ ⁿ ᵑ`) appear anywhere in t
 
 **`[ɲ]` does not merge with `/nj/` in 3 of the 14 `nj`/`ɲ` words, and the rule is implemented anyway.** Covered under [The variant assertions](#the-variant-assertions-all-six-of-them) — the user's decision (2026-08-27) is to implement assertion 5 as the sketch states it and let the three conflicting words fail the held-out fixture for now, to be fixed in FLEx once seen, rather than special-case the rule around them.
 
-With that decision, the rule set gives **5 mismatches out of 246**, all expected and all left in the fixture rather than held out:
+With that decision, the rule set gives **6 mismatches out of 246**, all expected and all left in the fixture rather than held out:
 
 | Etic | Rule-set output | Real emic | Gloss | Reading |
 | ---- | ---------------- | --------- | ----- | ------- |
@@ -175,19 +180,38 @@ With that decision, the rule set gives **5 mismatches out of 246**, all expected
 | `ɲúnə̀` | `njúnə̀` | `ɲúnə̀` | bitterness | same |
 | `ɲo᷆k` | `njo᷆k` | `ɲo᷆k` | to weave | same |
 | `kɨ́kjōɾākàp` | `kə́kjōrākàp` | `kjukjōrɔ̄ kàp` | river molluscs; shells | not a phone-level correspondence — etic and emic look like different transcriptions of the word, not two levels of the same one. Data anomaly, not a rule; left to fail and be corrected in FLEx. |
+| `nzo᷇ɾ` | `ndzo᷇r` | `nzo᷇r` | chin | `nz → ndz` applied per assertion 3; the emic field is what looks wrong — see [Why the plain forms are covered too](#why-the-plain-forms-are-covered-too) |
 | `kɨ́ɾ wèɡbī` | `kə́r wèɡbī` | `kə́r wə̀ɡbī` | water yam | `wèɡbī` (plain `e`) versus the corpus's own `wɨ̀ɡbī` → `wə̀ɡbī` 'dog' (same string, etic `ɨ`, gloss-unrelated but phonologically identical). Reads as an etic transcription slip — should have been `ɨ` — not a new rule; left to fail and be corrected in FLEx. |
 
-All five stay in `real_flex_export` (see [Testing](#testing)) as ordinary approval-test mismatches: each run produces a `received/real_flex_export.received.txt` to diff against `approved/real_flex_export.approved.txt`, exactly the review loop the user asked for — no rule is built around any of them.
+All six stay in `real_flex_export` (see [Testing](#testing)) as ordinary approval-test mismatches: each run produces a `received/real_flex_export.received.txt` to diff against `approved/real_flex_export.approved.txt`, exactly the review loop the user asked for — no rule is built around any of them.
 
-**One more anomaly, resolved differently from the 5 mismatches above.** `ɡo᷅r**` 'payment' carries a trailing `**` on *both* the etic and emic columns — FLEx annotation noise, not phonemic content, and not something either converter's token lexicon covers (`**` would make `convert()` raise `ValueError`, same as it does on `phonemic2orthography.convert()` today). User's call (2026-08-27): strip the `**` from both columns when building the fixture, rather than leave it to fail or isolate it — the row becomes an ordinary `ɡo᷅r` → `ɡo᷅r` pair, one of the 181 rows in the corpus whose two columns are already identical. This also sidesteps a mechanical wrinkle worth recording even though it no longer bites: the CLI approval test feeds a whole fixture file to the converter through one `subprocess.run(..., check=True)` call, so a raising row would have crashed that *entire file's* test before producing any output — hiding the diff for the other 245 words, not just skipping the bad one. Stripping the `**` avoids ever hitting that, so it's not something the fixture layout needs to work around.
+**One more anomaly, resolved differently from the 6 mismatches above.** `ɡo᷅r**` 'payment' carries a trailing `**` on *both* the etic and emic columns — FLEx annotation noise, not phonemic content, and not something either converter's token lexicon covers (`**` would make `convert()` raise `ValueError`, same as it does on `phonemic2orthography.convert()` today). User's call (2026-08-27): strip the `**` from both columns when building the fixture, rather than leave it to fail or isolate it — the row becomes an ordinary `ɡo᷅r` → `ɡo᷅r` pair, one of the 181 rows in the corpus whose two columns are already identical. This also sidesteps a mechanical wrinkle worth recording even though it no longer bites: the CLI approval test feeds a whole fixture file to the converter through one `subprocess.run(..., check=True)` call, so a raising row would have crashed that *entire file's* test before producing any output — hiding the diff for the other 245 words, not just skipping the bad one. Stripping the `**` avoids ever hitting that, so it's not something the fixture layout needs to work around.
 
-**Counter-evidence on the `nzor` ('chin') row, found after the source-errors confirmation above.** The real corpus contains exactly this word: `nzo᷇ɾ` → `nzo᷇r` 'chin', in its *emic* (phonemic) column — no `d`, matching the sketch chart's disputed `nzor`, not the `ndzor` the stated `/ⁿdz/` → `ndz` grapheme rule would predict. Unlike `ɲ`, there's no second, contradicting form of this word in the corpus to weigh against it. Two readings are both live: either the chart's `nzor` example is genuinely a leftover from before the `nj`→`ndz` grapheme change (as reasoned in [Prototype results](#prototype-results-measured-not-assumed)), and this FLEx entry's emic field simply hasn't been updated to match either — or 'chin' is not actually an instance of the `/ⁿdz/` phoneme at all, and the sketch's own classification of it under that phoneme (in `@ex:variant_ⁿdz_ⁿz`, alongside `[ʃī ⁿdzòɾ]` 'beard' as the `[ⁿdz]` counterpart) is the error, with the two words never having been the same phoneme in the first place. Both readings still say the same thing for this converter: don't apply the `ⁿz → ndz` rule to plain, non-superscript `nz` — the real corpus never spells it as pre-nasalised with the sketch's modifier-letter notation, so the rule as scoped (superscript `ⁿ` only) already does the right thing here. Flagging this because it complicates "just a source error" enough that the linguist may want to know before the fixture is finalised, not because it changes the rule set as written.
+## Why the plain forms are covered too
+
+The `nz`/`ndʒ` rules apply to the plain letter sequences as well as the superscript ones, in any position. This paragraph records why, because the reasoning is not in either source document and an earlier draft of this plan got it wrong.
+
+**First, a correction to that earlier draft.** It floated the possibility that 'chin' might not be a `/ⁿdz/` word at all, and that the sketch's classification of it was the error. That reading is much weaker than it was presented as, because `@ex:variant_ⁿdz_ⁿz` is a *morphological* argument, not a guess:
+
+| Form | Gloss |
+| ---- | ----- |
+| `[ʃi᷆]` | 'hair' |
+| `[ⁿzo᷇ɾ]` | 'chin' |
+| `[ʃī ⁿdzòɾ]` | 'beard' — literally "hair (of) chin" |
+
+The same 'chin' morpheme surfaces as `[ⁿz]` on its own and as `[ⁿdz]` inside the compound. That is same-morpheme-two-realisations evidence, which is the good kind. The coronal phone relationship chart also marks the `ⁿdz` × `ⁿz` cell as `variant:` and offers no contrast evidence for the pair anywhere. So `[ⁿdz]`, `[ⁿz]` and `[ⁿdʒ]` really are one phoneme `/ⁿdz/`, written `ndz`, and nothing in either source contradicts that. `[ⁿdʒ]` rests on a single prose line and appears in no chart and no example word, so it has less positive evidence than the other two — but nothing against it either.
+
+**Why the rule can't be scoped to the superscript notation.** The superscript itself encodes an interpretation — that the nasal is part of a prenasalised onset rather than a preceding syllable's coda. That interpretation has not been worked out yet for Zhire, so the phonemic field in real data currently just inherits whatever the phonetic transcription had, superscript or not. In practice the real corpus uses **no** superscripts at all. A rule scoped to `ⁿz` would therefore never fire on real data, and 'chin' would pass the fixture for the wrong reason: not because the rule normalised both sides, but because it normalised neither.
+
+**Why "everywhere" rather than word-initial only.** The sketch justifies prenasalisation positionally — "since there are no consonant clusters in a single syllable, word-initial `[nd]` is better interpreted as `/ⁿd/`" — which argues for a word-initial condition, since a word-internal `nz` could in principle be a coda `/n/` plus an onset `/z/`. Applying it everywhere is nonetheless the deliberate choice (user's call, 2026-08-27): the interpretation that would justify a positional restriction is exactly the thing not yet worked out, and it makes no difference to the orthography either way. It also keeps this converter's mapping completely flat — a positional rule would be the single context-dependent entry in an otherwise context-free lexicon, and would need the FST to model word boundaries. Revisit if the syllable-structure analysis later distinguishes the two cases.
+
+**Measured effect of the broadening.** On the sketch: no change at all — 44 of 47 chart rows and 183 of 183 forms, exactly as before, since the sketch contains no plain `nz` or `ndʒ` in any example. On the real corpus: one row changes, `nzo᷇ɾ` 'chin', which now converts to `ndzo᷇r` against an emic field reading `nzo᷇r`, so it fails visibly instead of passing silently. That is the intended outcome — the emic field is the thing that looks wrong here, and the corpus contradicts itself on this exact point: 'orange' has emic `tá ndzɛ̀r` with `ndz`, while 'chin' has emic `nzo᷇r` with `nz`, both `/ⁿdz/` words under the analysis above. Checked for over-application: the only other nasal-plus-fricative sequence anywhere in the corpus is word-internal `ŋs` in `nuŋsɔ` 'to smell', which these rules do not touch, and `[dʒ]` with no preceding nasal is left alone as required (`dʒũ̄jɔ̃̄` 'command' converts unchanged), so `/dʒ/` is not collapsed into `/dz/`.
 
 ## What `convert()` does
 
 1. Normalise the input to NFD, so a base letter and its combining marks are separate code points.
 2. Replace ASCII `:` with `ː`.
-3. Feed the result through the pynini token lexicon, which tokenises by maximal munch and rewrites each token per [The mapping](#the-mapping). Exactly two tokens are genuinely multi-character — `ⁿz` → `ndz` and `ⁿdʒ` → `ndz` — and both must win over their single-character parts, which maximal munch gives for free; the sibling converter's [correction 2](old/zhire-phonemic-to-orthography-fst.md#corrections-found-after-implementation) records where that behaviour actually comes from, and the same unweighted construction applies here. **Checked rather than assumed, per [AGENTS.md](../AGENTS.md#external-specifications) on not claiming a row "falls out":** every other multi-letter sequence really does fall out of the per-character rules — `ɕʷ` → `ɕw`, `ʑʷ` → `ʑw`, `hʷ` → `hw`, `ⁿdz` → `ndz`, `ᵑᵐɡb` → `ŋmɡb` — so none of them needs a token of its own. Worth stating explicitly because `ⁿdz` and `ⁿdʒ` differ by a single letter and only the second one needs an entry.
+3. Feed the result through the pynini token lexicon, which tokenises by maximal munch and rewrites each token per [The mapping](#the-mapping). Four tokens are genuinely multi-character — `ⁿz`, `nz`, `ⁿdʒ` and `ndʒ`, all → `ndz` — and each must win over its single-character parts, which maximal munch gives for free; the sibling converter's [correction 2](old/zhire-phonemic-to-orthography-fst.md#corrections-found-after-implementation) records where that behaviour actually comes from, and the same unweighted construction applies here. **Checked rather than assumed, per [AGENTS.md](../AGENTS.md#external-specifications) on not claiming a row "falls out":** every other multi-letter sequence really does fall out of the per-character rules — `ɕʷ` → `ɕw`, `ʑʷ` → `ʑw`, `hʷ` → `hw`, `ⁿdz` → `ndz`, `ᵑᵐɡb` → `ŋmɡb` — so none of them needs a token of its own. Worth stating explicitly because `ⁿdz` and `ⁿdʒ` differ by a single letter and only the second needs an entry — and the same trap applies to the plain pair, where `ndz` must fall through untouched while `ndʒ` is rewritten.
 4. Raise `ValueError` naming the input on anything the lexicon does not cover, matching `phonemic2orthography.py`'s contract rather than passing unknown text through.
 5. Normalise the result to NFC.
 
@@ -203,7 +227,7 @@ Following [AGENTS.md's Testing Approach](../AGENTS.md#testing-approach), and TDD
 
 - `phonology_sketch_examples` — **specification-derived, so the promote loop is wrong for it**, exactly as for the existing `orthography_statement_phonemes` fixture. Both sides come from the sketch: input is the phonetic example column of the three grapheme charts, and the approved side is hand-written from the sketch's phoneme column. Write it by hand; never promote a received file into it. Record its derivation in `zhire/SPEC.md`.
 - `phonology_sketch_words` — the sketch's other bracketed example forms, as a breadth net. There is no phonemic ground truth for these, so this one *is* an ordinary promote-loop fixture, and its approved file must be read before it is first promoted, not accepted on trust.
-- `real_flex_export` — the real held-out net: all 246 rows of `phonetic2phonemic_public_test.csv`, columns 3–4 only, with one cleanup: the `**` stripped from both columns of the `ɡo᷅r**` 'payment' row (per [5b](#open-questions)), so it converts as an ordinary identical pair rather than raising. The 5 remaining known mismatches (the 3 `ɲ` words plus the 2 data anomalies) are **left in this fixture on purpose** — they fail loudly with a normal received/approved diff for the user to review and fix in FLEx, rather than being held out or worked around with extra rules. **Specification-derived in the same sense as `phonology_sketch_examples`**: the emic column is independently elicited ground truth, not the converter's own output, so the promote loop is wrong for it too — write both sides directly from the CSV, never promote a received file into it. This is what caught the aspiration-deletion rule and the `ɲ`/`nj` split; see [Validation against real held-out data](#validation-against-real-held-out-data).
+- `real_flex_export` — the real held-out net: all 246 rows of `phonetic2phonemic_public_test.csv`, columns 3–4 only, with one cleanup: the `**` stripped from both columns of the `ɡo᷅r**` 'payment' row (per [5b](#open-questions)), so it converts as an ordinary identical pair rather than raising. The 6 known mismatches (the 3 `ɲ` words, the 'chin' row, and the 2 data anomalies) are **left in this fixture on purpose** — they fail loudly with a normal received/approved diff for the user to review and fix in FLEx, rather than being held out or worked around with extra rules. **Specification-derived in the same sense as `phonology_sketch_examples`**: the emic column is independently elicited ground truth, not the converter's own output, so the promote loop is wrong for it too — write both sides directly from the CSV, never promote a received file into it. This is what caught the aspiration-deletion rule and the `ɲ`/`nj` split; see [Validation against real held-out data](#validation-against-real-held-out-data).
 
 **An end-to-end composition test.** The most valuable check available, since the sketch supplies both ends: run each chart row's phonetic example through `phonetic2phonemic.convert()` then `phonemic2orthography.convert()` and compare against the sketch's orthography column. This is what produced the 44/47 above. Put it in `zhire/tests/`, and keep the 3 source-error sketch rows (`nden`, `nggei`, `nzor`) out of it until they are corrected upstream, with a comment naming them rather than a silent omission — these are the sketch's own chart rows, a different set from the `real_flex_export` mismatches above, which stay in their fixture and are expected to fail.
 
