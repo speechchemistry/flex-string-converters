@@ -85,6 +85,12 @@ Some converters implement a correspondence table that a human wrote down elsewhe
 - Ask clarifying questions in plain chat text, not via a multiple-choice/quick-answer UI widget.
 - Save non-trivial implementation plans to `plans/<descriptive-name>.md` in the repo (not only wherever the tool's own ephemeral plan-mode file lives), so they're preserved and reviewable via git history. This is not a one-time save: whenever the plan is revised (e.g. new information surfaces mid-planning), re-sync `plans/<name>.md` with the latest approved version before or immediately after implementation starts. A plan stays at the top level of `plans/` only while it is in flight; once implemented it moves to `plans/old/` — see [Plans](#plans).
 
+## Version Control
+
+- **Commit to `main`.** Don't create a branch for a change unless you were asked to. This repository has a single maintainer and is distributed by copying the checkout, so there is nothing for a branch to protect: it only adds a merge step and hides the work from anyone reading `git log main`.
+- Some coding agents default to branching whenever they are about to commit on the default branch. That default does not apply here — this rule overrides it. If a tool's own configuration also enforces branching, change the configuration rather than working around it.
+- The exception is a change the maintainer has said they want to review before it lands, or one large enough that they asked for a branch or a pull request. Ask if you are unsure; don't branch pre-emptively.
+
 ## Libraries And Dependencies
 
 - Reuse existing dependencies and idioms already present in the repo when possible.
