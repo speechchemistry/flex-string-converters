@@ -4,7 +4,7 @@
 #   Zhire phonetic transcription to phonemic transcription
 #
 #   Turns a Zhire phonetic transcription into the phonemic transcription
-#   that phonemic2orthography.convert() already accepts, so the two compose:
+#   that phonemic2orthography.Convert() already accepts, so the two compose:
 #   phonetic -> phonemic -> orthography. Implements the allophony and
 #   notation rules of the Zhire phonology sketch (draft), checked against
 #   246 real phonetic/phonemic word pairs. See
@@ -111,7 +111,7 @@ _TOKEN_STAR = pynini.string_map(
 ).closure()
 
 
-def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+def Convert(input_string): # function is named "Convert" so it can be used as an SIL Flex Process
     decomposed = unicodedata.normalize('NFD', input_string)
     stripped = _strip_release_marks(decomposed)
     lattice = pynini.accep(stripped, token_type="utf8") @ _TOKEN_STAR
@@ -151,7 +151,7 @@ def main():
     else:
         lines = (line.rstrip("\n") for line in sys.stdin)
     for line in lines:
-        print(convert(line))
+        print(Convert(line))
 
 if __name__ == '__main__':
     main()

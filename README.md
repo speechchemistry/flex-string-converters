@@ -2,7 +2,7 @@
 
 String converters for linguistic data, each usable three ways: from the command line, as an SIL FieldWorks Language Explorer (FLEx) Process, and as a [FlexTools](https://github.com/cdfarrow/flextools) module that runs it over a whole lexicon.
 
-Converters are grouped into **project folders** at the repository root, one per topic or language community. Each converter is a plain Python 3 file with a `convert()` function that takes a string and returns a string, with no FieldWorks dependency, so it runs and can be tested anywhere. A project folder's own top-level `.py` files, if any, are thin FlexTools modules that call one of its converters.
+Converters are grouped into **project folders** at the repository root, one per topic or language community. Each converter is a plain Python 3 file with a `Convert()` function that takes a string and returns a string, with no FieldWorks dependency, so it runs and can be tested anywhere. A project folder's own top-level `.py` files, if any, are thin FlexTools modules that call one of its converters.
 
 These modules are in development. **Please back up your FLEx project before running any of them** — FLEx has no undo across a FlexTools run.
 
@@ -12,7 +12,7 @@ Converting between tone diacritics and Chao tone letters. Not specific to any on
 
 ### `chao-tone-letters/converters/diacritics2chao.py`
 
-`convert()` strips tone diacritics from the input and appends its Chao tone letters. For example `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. The tone-letters-only extraction is also available on its own as `tone_diacritics_to_chao_letters()`, e.g. `nə̀jɛ᷅t` → `˨ ˨˧`.
+`Convert()` strips tone diacritics from the input and appends its Chao tone letters. For example `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. The tone-letters-only extraction is also available on its own as `tone_diacritics_to_chao_letters()`, e.g. `nə̀jɛ᷅t` → `˨ ˨˧`.
 
 Run it on its own to convert text given as arguments, or lines read from standard input:
 
@@ -39,7 +39,7 @@ It should also work as a FLEx Process once FLEx allows Python 3 processes (at th
 
 ### `chao-tone-letters/converters/chao2diacritics.py`
 
-Reverses `diacritics2chao.py`: `convert()` places Chao tone letters back onto their base text as tone diacritics. For example `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`.
+Reverses `diacritics2chao.py`: `Convert()` places Chao tone letters back onto their base text as tone diacritics. For example `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`.
 
 **Where the tone letters sit doesn't matter.** They can be attached to their syllable, gathered into a section before or after the text, or a mixture, and all give the same result — so a spreadsheet, a shell pipeline or a copy-paste that collapses runs of spaces or adds a trailing one can't change the reading:
 
@@ -67,7 +67,7 @@ $ cat warnings.txt
 chao2diacritics: line 2: not converted: no tone diacritic for ˨˩: 'ka˨˩'
 ```
 
-The exit status stays 0 when lines warn, so an existing pipeline doesn't start breaking. `convert_with_warnings()` returns those same strings alongside the result for callers that want them, leaving `convert()` a plain string-to-string function.
+The exit status stays 0 when lines warn, so an existing pipeline doesn't start breaking. `convert_with_warnings()` returns those same strings alongside the result for callers that want them, leaving `Convert()` a plain string-to-string function.
 
 `diacritics2chao.py --attached` writes the tone letters in this form, which is the safer one to store precisely because its spacing means nothing:
 
@@ -86,7 +86,7 @@ It needs the same `regex` package as `diacritics2chao.py`; FieldWorks is not req
 
 A FlexTools module. To install, copy the `chao-tone-letters/` folder alone into your FlexTools `Modules` folder — not the whole repository checkout, since FlexTools only looks one folder deep for modules, and the module files live inside the project folder, not at the repository root. `converters/` and `tests/` inside it are left alone either way.
 
-Goes through all the lexeme forms, runs `diacritics2chao.py`'s `convert()` over each one, and puts the result — the spelled form with tone diacritics stripped, plus its Chao tone letters when it has any — into a custom `Pitch` field. You can use Bulk Edit Entries in FLEx to move these to the desired field.
+Goes through all the lexeme forms, runs `diacritics2chao.py`'s `Convert()` over each one, and puts the result — the spelled form with tone diacritics stripped, plus its Chao tone letters when it has any — into a custom `Pitch` field. You can use Bulk Edit Entries in FLEx to move these to the desired field.
 
 This module was previously named `Extract_Chao_tone_letters_from_accent_notation.py`. If you have an older copy installed in your FlexTools `Modules` folder, delete it before copying in this one — FlexTools will otherwise try to load both, and the old file's import of the since-renamed converter will fail.
 
@@ -103,7 +103,7 @@ converters compose: phonetic → phonemic → orthography.
 
 ### `zhire/converters/phonetic2phonemic.py`
 
-`convert()` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic
+`Convert()` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic
 transcription into the phonemic transcription `phonemic2orthography.py` accepts, using a finite-state
 transducer, e.g. `ɲápsə́` → `njápsə́`.
 
@@ -123,7 +123,7 @@ asserts a syllable-structure interpretation that hasn't been settled for Zhire.
 
 ### `zhire/converters/phonemic2orthography.py`
 
-`convert()` strips tone diacritics (the orthography has no tone-marking convention yet) and maps the
+`Convert()` strips tone diacritics (the orthography has no tone-marking convention yet) and maps the
 remaining phonemic string to its orthographic spelling using a finite-state transducer, e.g. `hwōrì`
 → `whori`.
 
@@ -151,8 +151,8 @@ Kept at the repository root, since it isn't specific to any one project folder. 
 ## Adding a new converter
 
 1. Decide whether it belongs in an existing project folder or needs a new one. For a new project folder, see the [`adding-a-project`](.claude/skills/adding-a-project/SKILL.md) skill, which scaffolds `<project>/{SPEC.md, converters/, tests/}`.
-2. Add `<project>/converters/<what_it_converts>.py` with a `convert(input_string)` function and a command line interface, and no `flextoolslib` or FieldWorks import.
-3. Add `<project>/tests/test_<what_it_converts>.py` covering `convert()` directly.
+2. Add `<project>/converters/<what_it_converts>.py` with a `Convert(input_string)` function and a command line interface, and no `flextoolslib` or FieldWorks import.
+3. Add `<project>/tests/test_<what_it_converts>.py` covering `Convert()` directly.
 4. Once the CLI has realistic or awkward-to-assert-inline output, add approval fixtures under `<project>/tests/fixtures/<what_it_converts>/` — see [Approval testing](#approval-testing) below.
 5. If it should run over a whole lexicon, follow the [`adding-a-flextools-module`](.claude/skills/adding-a-flextools-module/SKILL.md) skill to wrap it starting from `__Template_converter_module.py`.
 6. Update the project's `SPEC.md` (and the root [SPEC.md](SPEC.md) index, if it's a new project) and this README in the same change.
@@ -175,7 +175,7 @@ from the repository root, which discovers every project's tests in one run — e
 - Approved outputs are in `<project>/tests/fixtures/<converter>/approved/*.approved.txt`.
 - On a mismatch — or on a brand new fixture that has no approved output yet — the proposed output is written to `<project>/tests/fixtures/<converter>/received/*.received.txt`, and the test failure prints the exact command to promote it.
 
-Unlike the EAF/XML fixtures in those sibling repos, comparison here is exact: no scrubbing and no Unicode normalisation, since NFC/NFD handling is itself part of what each `convert()` guarantees.
+Unlike the EAF/XML fixtures in those sibling repos, comparison here is exact: no scrubbing and no Unicode normalisation, since NFC/NFD handling is itself part of what each `Convert()` guarantees.
 
 Most of `chao2diacritics.py`'s input fixtures are `diacritics2chao.py`'s own approved outputs, copied over as-is: that makes its approval suite a genuine round-trip regression net against real converter output, rather than a fresh set of guesses.
 

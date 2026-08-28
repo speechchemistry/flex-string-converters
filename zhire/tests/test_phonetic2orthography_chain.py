@@ -7,7 +7,7 @@
 #   tests/fixtures/phonetic2phonemic/phonology_sketch_examples.txt already
 #   checks at the phonemic level: a phonetic example word and its
 #   orthographic spelling. Running the phonetic form through
-#   phonetic2phonemic.convert() and then phonemic2orthography.convert() and
+#   phonetic2phonemic.Convert() and then phonemic2orthography.Convert() and
 #   comparing to the orthography column is therefore the strongest test
 #   available for the composition, since it needs no separately-authored
 #   expectation.
@@ -25,7 +25,7 @@
 #   in the phonology sketch.
 #
 #   Each phonetic example is transliterated to plain notation where the
-#   sketch writes ʷ/ʲ/ᵐ/ⁿ/ᵑ, since phonetic2phonemic.convert() rejects that
+#   sketch writes ʷ/ʲ/ᵐ/ⁿ/ᵑ, since phonetic2phonemic.Convert() rejects that
 #   notation outright -- see the plan's "Modifier letters rejected, not
 #   transliterated" section. Generated mechanically from the sketch's own
 #   chart rows rather than transcribed by hand, per
@@ -37,8 +37,8 @@ import unicodedata
 
 import pytest
 
-from phonetic2phonemic import convert as phonetic_to_phonemic
-from phonemic2orthography import convert as phonemic_to_orthography
+from phonetic2phonemic import Convert as phonetic_to_phonemic
+from phonemic2orthography import Convert as phonemic_to_orthography
 
 # (phonetic example, orthographic spelling), one row per phoneme in the
 # sketch's three orthography charts, in chart order.

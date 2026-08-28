@@ -2,7 +2,7 @@
 #
 #   Tests for the Zhire phonemic-to-orthography conversion
 #
-#   These exercise convert() directly: it takes and returns a plain string
+#   These exercise Convert() directly: it takes and returns a plain string
 #   and needs no FLEx project, so it runs on any platform.
 #
 #   Each test here pins one general rule with a minimal, deliberately
@@ -16,32 +16,32 @@
 
 import pytest
 
-from phonemic2orthography import convert
+from phonemic2orthography import Convert
 
 
 def test_strips_a_tone_diacritic():
     # Every vowel's tone diacritics come off on the way to orthography;
     # none of the orthography statement's own spellings carry one.
-    assert convert("pá") == "pa"
+    assert Convert("pá") == "pa"
 
 
 def test_keeps_the_nasalisation_tilde():
     # /ã/ -> ã is the orthography statement's own worked example (the word
     # for 'frog'); unlike a tone diacritic, the combining tilde survives.
-    assert convert("sã") == "sã"
+    assert Convert("sã") == "sã"
 
 
 def test_doubles_a_lengthened_vowel():
     # /iː/ -> ii is the orthography statement's own worked example (the
     # word for 'flock of birds'), generalised to every vowel per your
     # confirmation.
-    assert convert("kpiː") == "kpii"
+    assert Convert("kpiː") == "kpii"
 
 
 def test_doubles_a_nasalised_and_lengthened_vowel_keeping_the_tilde_on_each_copy():
     # No attested example exists for this combination yet; this pins the
     # assumption you confirmed rather than a real word.
-    assert convert("ɔ̃ː") == "ɔ̃ɔ̃"
+    assert Convert("ɔ̃ː") == "ɔ̃ɔ̃"
 
 
 @pytest.mark.parametrize("phonemic, orthographic", [
@@ -51,11 +51,11 @@ def test_doubles_a_nasalised_and_lengthened_vowel_keeping_the_tilde_on_each_copy
     ("ʑwa", "yha"),   # ʑw -> yh: ʑ has no meaning on its own
 ])
 def test_override_sequences_that_cant_fall_out_of_plain_concatenation(phonemic, orthographic):
-    assert convert(phonemic) == orthographic
+    assert Convert(phonemic) == orthographic
 
 
 def test_space_is_kept_as_a_word_divider():
-    assert convert("a b") == "a b"
+    assert Convert("a b") == "a b"
 
 
 def test_unmapped_input_raises_rather_than_passing_through_or_dropping_silently():
@@ -65,4 +65,4 @@ def test_unmapped_input_raises_rather_than_passing_through_or_dropping_silently(
     # per your confirmation. A bare ɲ is therefore unmapped, not an
     # alternate spelling.
     with pytest.raises(ValueError):
-        convert("ɲ")
+        Convert("ɲ")

@@ -18,7 +18,7 @@ from flextoolslib import *
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "converters"))
-from diacritics2chao import convert
+from diacritics2chao import Convert
 
 #----------------------------------------------------------------
 # Documentation for the user:
@@ -121,7 +121,7 @@ def MainFunction(project, report, modifyAllowed):
     for entryNumber, entry in enumerate(project.LexiconAllEntries()):
         report.ProgressUpdate(entryNumber)
         lexeme_form_itsstring = project.LexiconGetLexemeForm(entry)
-        chao_letters = convert(lexeme_form_itsstring)
+        chao_letters = Convert(lexeme_form_itsstring)
         report.Info(lexeme_form_itsstring + " -> " + chao_letters)
         if not chao_letters:
             # Writing the empty result would clear a value entered by hand

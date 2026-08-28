@@ -8,7 +8,7 @@ Each converter is specified first, since the converter is the product and runs t
 
 ## Chao Tone Letters From Tone Diacritics
 
-Converter: `converters/diacritics2chao.py`. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency, so the rules below hold whether it is called from FlexTools, from the command line, or as a FLEx Process.
+Converter: `converters/diacritics2chao.py`. Takes and returns a plain string via `Convert()`, needs no FLEx project, and has no `flextoolslib` dependency, so the rules below hold whether it is called from FlexTools, from the command line, or as a FLEx Process.
 
 **Transform of `tone_diacritics_to_chao_letters()`.**
 
@@ -45,7 +45,7 @@ Converter: `converters/diacritics2chao.py`. Takes and returns a plain string via
 
 Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in the input and not derived from any tone diacritic — e.g. a bare `˥` — is ordinary text as far as step 2's unit walk is concerned, so it collapses away like any other non-vowel, non-syllabic character: `tone_diacritics_to_chao_letters("˥")` → `""`.
 
-**Transform of `convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
+**Transform of `Convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
 
 1. The input is normalised to NFD.
 2. A `base_text` is built by removing only the 13 recognised tone diacritics listed above from the decomposed form, then normalising the result back to NFC. Other diacritics and all whitespace are left exactly as in the input.
@@ -54,11 +54,11 @@ Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in t
 
 Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
 
-**Attached output.** `convert(input_string, attached=True)`, and equivalently `tone_diacritics_to_attached(input_string)`, writes each unit's tone letters immediately after that unit instead of gathering them into a trailing section: `nə̀jɛ᷅t` → `nə˨jɛ˨˧t`, `bjo᷆ sādù` → `bjo˧˨ sa˧du˨`. The segmentation, the tone-letter values and the adjacent-duplicate collapsing are all exactly as above; only where the letters are written differs. A word with no tone diacritics is returned as it was.
+**Attached output.** `Convert(input_string, attached=True)`, and equivalently `tone_diacritics_to_attached(input_string)`, writes each unit's tone letters immediately after that unit instead of gathering them into a trailing section: `nə̀jɛ᷅t` → `nə˨jɛ˨˧t`, `bjo᷆ sādù` → `bjo˧˨ sa˧du˨`. The segmentation, the tone-letter values and the adjacent-duplicate collapsing are all exactly as above; only where the letters are written differs. A word with no tone diacritics is returned as it was.
 
 The point of the form is that spacing then carries no meaning at all, so a shell pipeline, a spreadsheet or a copy-paste that collapses runs of spaces or adds a trailing one cannot change how the result reads back — which the trailing section, whose word gaps *are* its meaning, cannot survive. It is therefore the safer form to store in a table column or a FLEx field. It is off by default so that the FLEx Process, the FlexTools module and every existing caller keep the output they already have.
 
-`convert()` keeps its single-argument signature for use as an SIL FLEx Process; `attached` is an optional keyword argument.
+`Convert()` keeps its single-argument signature for use as an SIL FLEx Process; `attached` is an optional keyword argument.
 
 **Command line.** Text given as arguments is converted one result per line, in the order given. With no arguments the converter reads standard input line by line and writes one converted line per input line, so it works as a filter in a pipeline. `--attached` selects the attached output described above. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
 
@@ -66,11 +66,11 @@ The point of the form is that spacing then carries no meaning at all, so a shell
 
 ## Tone Diacritics From Chao Tone Letters
 
-Converter: `converters/chao2diacritics.py`. Reverses `converters/diacritics2chao.py`: given text carrying Chao tone letters, places tone diacritics back onto the tone-bearing units they belong to. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency.
+Converter: `converters/chao2diacritics.py`. Reverses `converters/diacritics2chao.py`: given text carrying Chao tone letters, places tone diacritics back onto the tone-bearing units they belong to. Takes and returns a plain string via `Convert()`, needs no FLEx project, and has no `flextoolslib` dependency.
 
-**Where the tone letters may sit.** Anywhere. `convert()` reads the tone letters attached to their syllable (`ma˦ ti˦˨`), gathered into a section before or after the text (`ma ti ˦  ˦˨`, `˦  ˦˨ ma ti`), or a mixture of those, and all of them give the same result. Spacing carries no meaning of its own, so a spreadsheet, a shell pipeline or a copy-paste that collapses runs of spaces or adds a trailing one cannot change the reading.
+**Where the tone letters may sit.** Anywhere. `Convert()` reads the tone letters attached to their syllable (`ma˦ ti˦˨`), gathered into a section before or after the text (`ma ti ˦  ˦˨`, `˦  ˦˨ ma ti`), or a mixture of those, and all of them give the same result. Spacing carries no meaning of its own, so a spreadsheet, a shell pipeline or a copy-paste that collapses runs of spaces or adds a trailing one cannot change the reading.
 
-**Transform of `convert()`.**
+**Transform of `Convert()`.**
 
 1. The input is NFD-normalised and walked once by grapheme cluster. Every run of adjacent Chao tone letters (`U+02E5`–`U+02E9`) is one **group**, so `˦˨` is a single contour and `˦ ˨` is two groups.
 2. Each group is **attached** or **free**. It is attached when it immediately follows a tone-bearing unit in the same word with no whitespace in between — reaching back over a coda consonant, so `mat˦` marks the `a`. It is free otherwise: preceded by whitespace, or at the start of a word.
@@ -94,7 +94,7 @@ Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`, and identically `nə˨jɛ˨˧t` �
 
 **Any Chao tone letter in the input is consumed as a tone mark.** This converter has no trailing-section pattern to match first, so unlike `diacritics2chao.py` — whose step 2 leaves a tone letter already present in the input as ordinary text — it cannot treat one as literal data. Text that needs to carry a Chao tone letter as content is not valid input to this converter.
 
-**Warnings.** `convert_with_warnings(input_string)` returns `(result, warnings)`, where `warnings` is a possibly empty list of plain strings; `convert()` returns just the first element. They are kept apart so that `convert()` writes nothing anywhere: it runs unchanged as an SIL FLEx Process, and a FlexTools module wrapping it must report through the `report` object rather than `print`. The list is not exhaustive, and covers:
+**Warnings.** `convert_with_warnings(input_string)` returns `(result, warnings)`, where `warnings` is a possibly empty list of plain strings; `Convert()` returns just the first element. They are kept apart so that `Convert()` writes nothing anywhere: it runs unchanged as an SIL FLEx Process, and a FlexTools module wrapping it must report through the `report` object rather than `print`. The list is not exhaustive, and covers:
 
 | Condition | Message | Converted? |
 | --- | --- | --- |
@@ -107,7 +107,7 @@ Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`, and identically `nə˨jɛ˨˧t` �
 
 **`chao_letters_to_tone_diacritics(base_text, tone_letters)`** places `tone_letters` onto `base_text`'s units as free groups and returns `None` if they don't correspond — useful on its own when spelling and tone letters already come from two separate fields, such as a FlexTools module reading a lexeme form and a `Pitch` field.
 
-**Round-trip status.** `diacritics2chao.py`'s `convert()` followed by this converter's `convert()` returns the original word exactly, for every word that isn't one of the two cases below — in either of that converter's output forms, the trailing section or `--attached`. This converter's `convert()` followed by `diacritics2chao.py`'s `convert()` is always exact.
+**Round-trip status.** `diacritics2chao.py`'s `Convert()` followed by this converter's `Convert()` returns the original word exactly, for every word that isn't one of the two cases below — in either of that converter's output forms, the trailing section or `--attached`. This converter's `Convert()` followed by `diacritics2chao.py`'s `Convert()` is always exact.
 
 What does not round trip: which vowels of a diphthong originally carried a tone diacritic is not recoverable, since a level tone repeated across a diphthong and a level tone written on only one of its vowels produce the same tone letters (`kāi` and `kāī` both give `kai ˧`, and this converter always writes `kāī`), and likewise for a contour written as a single tone diacritic versus one letter per vowel (`kǎi` and `kàí` both give `kai ˨˦`, and this converter always writes `kàí`).
 
@@ -121,16 +121,16 @@ Module: `Extract_Chao_tone_letters_from_tone_diacritics.py`, wrapping the conver
 
 **Reads.** The lexeme form of every entry, via `LexiconGetLexemeForm(entry)`. The lexeme form is read in the project's default vernacular writing system, so that writing system must be the one holding the tone diacritics.
 
-**Transform.** `convert()` from `converters/diacritics2chao.py`, exactly as specified above — the lexeme form with tone diacritics stripped, plus tone letters when the lexeme form has any. The module adds no rules of its own.
+**Transform.** `Convert()` from `converters/diacritics2chao.py`, exactly as specified above — the lexeme form with tone diacritics stripped, plus tone letters when the lexeme form has any. The module adds no rules of its own.
 
 **Writes.** The entry-level custom field named `Pitch`, via `LexiconSetFieldText(entry, flagsField, chao_letters, ws)`, and only when `modifyAllowed` is true.
 
 - The value **replaces** whatever the field held, so running the module twice over the same entries leaves the same result as running it once.
-- `Pitch` is overwritten with `convert()`'s result for every entry with a non-empty lexeme form — the spelled form alone when it has no tone marks, spelled form plus tone letters when it does. Only a genuinely blank lexeme form is left untouched. A `Pitch` value entered by hand is therefore **not** protected on entries whose lexeme form lacks tone marks: it is overwritten with the spelled form.
+- `Pitch` is overwritten with `Convert()`'s result for every entry with a non-empty lexeme form — the spelled form alone when it has no tone marks, spelled form plus tone letters when it does. Only a genuinely blank lexeme form is left untouched. A `Pitch` value entered by hand is therefore **not** protected on entries whose lexeme form lacks tone marks: it is overwritten with the spelled form.
 - `ws` is the project's default vernacular writing system — the same one the lexeme form is read from — unless the module's `PITCH_WS` constant names another. It is always passed explicitly, because `LexiconSetFieldText` otherwise defaults to the default *analysis* writing system, which would store text that a vernacular field never displays.
 - `LexiconAddTagToField` is deliberately not used: it reads the field back without a writing system, which raises `AttributeError` on a multi-string custom field.
 
-**Reporting.** The type of the `Pitch` field and the writing system being written to (that line prefixed with `[DRY RUN] ` when `modifyAllowed` is false), then an entry count, then a progress bar over all entries (`report.ProgressStart` / `report.ProgressUpdate`), then one `report.Info` line per entry showing `<lexeme form> -> <convert() result>`, then a final `Wrote Pitch for <n> of <total> entries; left <m> unchanged (empty lexeme form)` summary (`Would write` and the `[DRY RUN] ` prefix when `modifyAllowed` is false).
+**Reporting.** The type of the `Pitch` field and the writing system being written to (that line prefixed with `[DRY RUN] ` when `modifyAllowed` is false), then an entry count, then a progress bar over all entries (`report.ProgressStart` / `report.ProgressUpdate`), then one `report.Info` line per entry showing `<lexeme form> -> <Convert() result>`, then a final `Wrote Pitch for <n> of <total> entries; left <m> unchanged (empty lexeme form)` summary (`Would write` and the `[DRY RUN] ` prefix when `modifyAllowed` is false).
 
 The `Pitch` field's type is reported using `LexiconFieldIsStringType` and `LexiconFieldIsAnyStringType`. `LexiconFieldIsMultiType` is deliberately not used: in flexlibs 1.2.8 and flexlibs2 2.3.1 it reads `FLExLCM.CellarMultiTypes`, a name `FLExLCM` never defines, so it raises `AttributeError` for every field.
 

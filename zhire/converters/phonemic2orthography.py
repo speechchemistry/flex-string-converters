@@ -115,7 +115,7 @@ def _strip_tone_diacritics(input_string):
     )
 
 
-def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+def Convert(input_string): # function is named "Convert" so it can be used as an SIL Flex Process
     tone_stripped = _strip_tone_diacritics(input_string)
     lattice = pynini.accep(tone_stripped, token_type="utf8") @ _TOKEN_STAR
     if lattice.start() == pynini.NO_STATE_ID or lattice.num_states() == 0:
@@ -154,7 +154,7 @@ def main():
     else:
         lines = (line.rstrip("\n") for line in sys.stdin)
     for line in lines:
-        print(convert(line))
+        print(Convert(line))
 
 if __name__ == '__main__':
     main()

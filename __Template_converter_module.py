@@ -29,8 +29,8 @@ from flextoolslib import *
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "converters"))
-# replace my_converter with your converter's module name e.g. from diacritics2chao import convert
-from my_converter import convert
+# replace my_converter with your converter's module name e.g. from diacritics2chao import Convert
+from my_converter import Convert
 
 #----------------------------------------------------------------
 # Documentation for the user:
@@ -68,7 +68,7 @@ def MainFunction(project, report, modifyAllowed):
     for entryNumber, entry in enumerate(project.LexiconAllEntries()):
         report.ProgressUpdate(entryNumber)
         source = project.LexiconGetLexemeForm(entry)
-        result = convert(source)
+        result = Convert(source)
         report.Info(source + " -> " + result)
         if result:
             converted += 1
@@ -113,7 +113,7 @@ def MainFunction(project, report, modifyAllowed):
 #     for entryNumber, entry in enumerate(project.LexiconAllEntries()):
 #         report.ProgressUpdate(entryNumber)
 #         source = project.LexiconGetLexemeForm(entry)
-#         result = convert(source)
+#         result = Convert(source)
 #         report.Info(source + " -> " + result)
 #         if not result:
 #             unchanged += 1

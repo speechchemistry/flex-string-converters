@@ -246,8 +246,8 @@ def chao_letters_to_tone_diacritics(base_text, tone_letters):
 
 
 def convert_with_warnings(input_string):
-    # convert(), plus the reasons a line was left alone or is suspicious.
-    # Kept separate so that convert() itself writes nothing anywhere: it runs
+    # Convert(), plus the reasons a line was left alone or is suspicious.
+    # Kept separate so that Convert() itself writes nothing anywhere: it runs
     # unchanged as an SIL FLEx Process, and a FlexTools module wrapping it
     # must report through the report object rather than print.
     result, warnings = _engine(input_string)
@@ -255,7 +255,7 @@ def convert_with_warnings(input_string):
         return input_string, warnings
     return unicodedata.normalize('NFC', result), warnings
 
-def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+def Convert(input_string): # function is named "Convert" so it can be used as an SIL Flex Process
     return convert_with_warnings(input_string)[0]
 
 

@@ -8,7 +8,7 @@
 #   tests/fixtures/diacritics2chao/approved/<stem>.approved.txt (compared as
 #   decoded UTF-8 text, so only real content differences count, not platform
 #   line endings). No scrubbing and no Unicode normalisation are applied to
-#   either side: NFC/NFD handling is itself part of what convert() guarantees,
+#   either side: NFC/NFD handling is itself part of what Convert() guarantees,
 #   so normalising the comparison would hide a real regression.
 #
 #   A fixture with no approved file yet is not a test failure in the usual

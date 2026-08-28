@@ -2,7 +2,7 @@
 #
 #   Tests for the Chao tone letter conversion
 #
-#   These exercise convert() and tone_diacritics_to_chao_letters() directly:
+#   These exercise Convert() and tone_diacritics_to_chao_letters() directly:
 #   both take and return a plain string and need no FLEx project, so they run
 #   on any platform.
 #
@@ -13,7 +13,7 @@ import pytest
 
 import chao2diacritics
 from diacritics2chao import (
-    convert,
+    Convert,
     tone_diacritics_to_attached,
     tone_diacritics_to_chao_letters,
 )
@@ -104,7 +104,7 @@ def test_syllabic_consonant_is_its_own_syllable_even_with_no_following_consonant
 
 
 def test_convert_diphthong_with_level_tone():
-    assert convert("kāī") == "kai ˧"
+    assert Convert("kāī") == "kai ˧"
 
 
 def test_tone_letters_already_in_the_input_are_not_kept():
@@ -116,32 +116,32 @@ def test_tone_letters_already_in_the_input_are_not_kept():
 
 
 # ---------------------------------------------------------------
-# convert(): base text (tone diacritics stripped) plus tone letters
+# Convert(): base text (tone diacritics stripped) plus tone letters
 
 
 def test_convert_spec_example():
-    assert convert("nə̀jɛ᷅t") == "nəjɛt ˨ ˨˧"
+    assert Convert("nə̀jɛ᷅t") == "nəjɛt ˨ ˨˧"
 
 
 def test_convert_text_with_no_tone_diacritics_is_returned_unchanged():
-    assert convert("cat") == "cat"
+    assert Convert("cat") == "cat"
 
 
 def test_convert_leaves_unrelated_diacritics_in_the_base_text():
     # U+0308 (diaeresis, as in ë) is not one of the 13 recognised tone diacritics
-    assert convert("ë") == "ë"
+    assert Convert("ë") == "ë"
 
 
 def test_convert_does_not_duplicate_a_tone_letter_already_in_the_input():
-    # convert()'s base text keeps a tone letter unchanged (it's not one of
+    # Convert()'s base text keeps a tone letter unchanged (it's not one of
     # the 13 tone diacritics base_text strips), and
     # tone_diacritics_to_chao_letters() must not also treat it as something
     # it extracted, or it would appear twice.
-    assert convert("˥") == "˥"
+    assert Convert("˥") == "˥"
 
 
 def test_convert_empty_string():
-    assert convert("") == ""
+    assert Convert("") == ""
 
 
 # ---------------------------------------------------------------
@@ -153,7 +153,7 @@ NFC = lambda text: unicodedata.normalize("NFC", text)
 
 
 def test_the_trailing_section_stays_the_default():
-    assert convert(NFC("n\u0259\u0300j\u025b\u1dc5t")) == "n\u0259j\u025bt \u02e8 \u02e8\u02e7"
+    assert Convert(NFC("n\u0259\u0300j\u025b\u1dc5t")) == "n\u0259j\u025bt \u02e8 \u02e8\u02e7"
 
 
 @pytest.mark.parametrize("diacritics,attached", [
@@ -163,17 +163,17 @@ def test_the_trailing_section_stays_the_default():
     ("s\u0101kp\u00f2",               "sa\u02e7kpo\u02e8"),
 ])
 def test_attached_output(diacritics, attached):
-    assert convert(NFC(diacritics), attached=True) == attached
+    assert Convert(NFC(diacritics), attached=True) == attached
 
 
 def test_attached_output_leaves_a_toneless_word_alone():
-    assert convert("cat", attached=True) == "cat"
-    assert convert("ma\u0301 ti", attached=True) == "ma\u02e6 ti"
+    assert Convert("cat", attached=True) == "cat"
+    assert Convert("ma\u0301 ti", attached=True) == "ma\u02e6 ti"
 
 
 def test_tone_diacritics_to_attached_matches_convert():
     for text in ["n\u0259\u0300j\u025b\u1dc5t", "m\u00e1 t\u00ee", "cat"]:
-        assert tone_diacritics_to_attached(NFC(text)) == convert(NFC(text), attached=True)
+        assert tone_diacritics_to_attached(NFC(text)) == Convert(NFC(text), attached=True)
 
 
 @pytest.mark.parametrize("word", [
@@ -182,7 +182,7 @@ def test_tone_diacritics_to_attached_matches_convert():
 ])
 def test_attached_output_round_trips_back_through_chao2diacritics(word):
     # The whole point of the attached form: it survives being read back.
-    assert chao2diacritics.convert(convert(NFC(word), attached=True)) == NFC(word)
+    assert chao2diacritics.Convert(Convert(NFC(word), attached=True)) == NFC(word)
 
 
 def test_attached_output_survives_whitespace_mangling():
@@ -190,5 +190,5 @@ def test_attached_output_survives_whitespace_mangling():
     # cannot touch the attached form, which is why it is the safer thing to
     # store in a spreadsheet column or a FLEx field.
     import regex
-    attached = convert(NFC("bjo\u1dc6 s\u0101d\u00f9"), attached=True)
-    assert chao2diacritics.convert(regex.sub(r" {2,}", " ", attached)) == NFC("bjo\u1dc6 s\u0101d\u00f9")
+    attached = Convert(NFC("bjo\u1dc6 s\u0101d\u00f9"), attached=True)
+    assert chao2diacritics.Convert(regex.sub(r" {2,}", " ", attached)) == NFC("bjo\u1dc6 s\u0101d\u00f9")

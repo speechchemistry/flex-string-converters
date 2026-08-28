@@ -8,7 +8,7 @@
 #   tests/fixtures/chao2diacritics/approved/<stem>.approved.txt (compared as
 #   decoded UTF-8 text, so only real content differences count, not
 #   platform line endings). No scrubbing and no Unicode normalisation are
-#   applied to either side: NFC output is itself part of what convert()
+#   applied to either side: NFC output is itself part of what Convert()
 #   guarantees, so normalising the comparison would hide a real regression.
 #
 #   Most of these input files are exactly diacritics2chao.py's own approved

@@ -21,7 +21,7 @@ import regex
 
 
 # The 13 recognised tone diacritics and the Chao tone letters each maps to.
-# Both tone_diacritics_to_chao_letters() and convert() derive from this one
+# Both tone_diacritics_to_chao_letters() and Convert() derive from this one
 # table, so the codepoint set is never duplicated.
 TONE_DIACRITIC_TO_CHAO_LETTERS = {'̋':'˥', # ő
                    '́':'˦', # ó
@@ -159,7 +159,7 @@ def tone_diacritics_to_attached(input_string):
     ]
     return unicodedata.normalize('NFC', ''.join(rewritten))
 
-def convert(input_string, attached=False): # function is named "convert" so it can be used as an SIL Flex Process
+def Convert(input_string, attached=False): # function is named "Convert" so it can be used as an SIL Flex Process
     # attached=True writes each unit's tone letters after the unit instead of
     # in a trailing section. It is off by default so that the FLEx Process and
     # every existing caller keep the output they already have.
@@ -213,7 +213,7 @@ def main():
     else:
         lines = (line.rstrip("\n") for line in sys.stdin)
     for line in lines:
-        print(convert(line, attached=args.attached))
+        print(Convert(line, attached=args.attached))
 
 if __name__ == '__main__':
     main()

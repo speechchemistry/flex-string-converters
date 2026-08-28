@@ -2,7 +2,7 @@
 #
 #   Tests for the tone-diacritics-from-Chao-tone-letters conversion
 #
-#   These exercise convert() and chao_letters_to_tone_diacritics() directly:
+#   These exercise Convert() and chao_letters_to_tone_diacritics() directly:
 #   both take and return a plain string and need no FLEx project, so they
 #   run on any platform.
 #
@@ -17,7 +17,7 @@ from chao2diacritics import (
     TONE_BEARING_VOWELS,
     SYLLABIC_MARKS,
     chao_letters_to_tone_diacritics,
-    convert,
+    Convert,
     convert_with_warnings,
 )
 
@@ -58,55 +58,55 @@ def test_chao_letters_to_tone_diacritics_one_case_per_row(tone_letters, expected
 
 
 # ---------------------------------------------------------------
-# convert()
+# Convert()
 
 
 def test_convert_spec_example():
-    assert convert("nəjɛt ˨ ˨˧") == unicodedata.normalize("NFC", "nə̀jɛ᷅t")
+    assert Convert("nəjɛt ˨ ˨˧") == unicodedata.normalize("NFC", "nə̀jɛ᷅t")
 
 
 def test_convert_output_is_nfc():
     decomposed = unicodedata.normalize("NFD", "mí")
     precomposed = unicodedata.normalize("NFC", "mí")
     assert decomposed != precomposed          # guard: the two forms really differ
-    assert convert("mi ˦") == precomposed
+    assert Convert("mi ˦") == precomposed
 
 
 def test_syllabic_consonant_carries_its_own_tone():
-    assert convert("m̩ ˧") == unicodedata.normalize("NFC", "m̩̄")
+    assert Convert("m̩ ˧") == unicodedata.normalize("NFC", "m̩̄")
 
 
 def test_plain_consonant_cannot_carry_a_tone():
-    assert convert("n ˧") == "n ˧"
+    assert Convert("n ˧") == "n ˧"
 
 
 def test_length_mark_keeps_the_diacritic_on_the_vowel():
-    assert convert("oː ˧") == unicodedata.normalize("NFC", "ōː")
+    assert Convert("oː ˧") == unicodedata.normalize("NFC", "ōː")
 
 
 def test_existing_diacritic_is_stacked_under_not_replaced():
-    assert convert("ɛ̃ ˨") == unicodedata.normalize("NFC", "ɛ̃̀")
+    assert Convert("ɛ̃ ˨") == unicodedata.normalize("NFC", "ɛ̃̀")
 
 
 def test_level_tone_over_a_diphthong_repeats_on_both_vowels():
-    assert convert("kai ˧") == unicodedata.normalize("NFC", "kāī")
+    assert Convert("kai ˧") == unicodedata.normalize("NFC", "kāī")
 
 
 def test_contour_over_a_diphthong_distributes_one_letter_per_vowel():
-    assert convert("kai ˨˦") == unicodedata.normalize("NFC", "kàí")
+    assert Convert("kai ˨˦") == unicodedata.normalize("NFC", "kàí")
 
 
 def test_same_contour_on_one_vowel():
-    assert convert("ka ˨˦") == unicodedata.normalize("NFC", "kǎ")
+    assert Convert("ka ˨˦") == unicodedata.normalize("NFC", "kǎ")
 
 
 def test_words_are_separated_by_the_two_space_word_gap():
-    assert convert("nət nət ˨  ˨") == unicodedata.normalize("NFC", "nə̀t nə̀t")
+    assert Convert("nət nət ˨  ˨") == unicodedata.normalize("NFC", "nə̀t nə̀t")
 
 
 @pytest.mark.parametrize("text", ["", "cat", "cat   dog", "˥"])
 def test_passthrough(text):
-    assert convert(text) == text
+    assert Convert(text) == text
 
 
 @pytest.mark.parametrize("text", [
@@ -116,11 +116,11 @@ def test_passthrough(text):
     "ka ˨˩",       # a contour with no tone diacritic among the 13
 ])
 def test_mismatch_returns_the_input_unchanged(text):
-    assert convert(text) == text
+    assert Convert(text) == text
 
 
 # ---------------------------------------------------------------
-# Round trip: diacritics2chao.convert() followed by chao2diacritics.convert()
+# Round trip: diacritics2chao.Convert() followed by chao2diacritics.Convert()
 # returns the original word, for words where the forward conversion loses
 # no information. A diphthong whose tone diacritic placement is ambiguous
 # on the way back (e.g. kǎi, whose tone letters are indistinguishable from
@@ -149,7 +149,7 @@ ROUND_TRIP_WORDS = [
 
 @pytest.mark.parametrize("word", ROUND_TRIP_WORDS)
 def test_round_trip(word):
-    assert convert(diacritics2chao.convert(word)) == unicodedata.normalize("NFC", word)
+    assert Convert(diacritics2chao.Convert(word)) == unicodedata.normalize("NFC", word)
 
 
 # ---------------------------------------------------------------
@@ -169,29 +169,29 @@ NFC = lambda text: unicodedata.normalize("NFC", text)
     "ma\u02e6 ti \u02e6\u02e8",     # one attached, one detached
 ])
 def test_every_arrangement_of_the_same_tone_letters_gives_the_same_result(text):
-    assert convert(text) == NFC("m\u00e1 t\u00ee")
+    assert Convert(text) == NFC("m\u00e1 t\u00ee")
 
 
 def test_an_attached_group_reaches_back_over_a_coda_consonant():
-    assert convert("mat\u02e6") == NFC("m\u00e1t")
+    assert Convert("mat\u02e6") == NFC("m\u00e1t")
 
 
 def test_attached_marking_may_leave_a_syllable_toneless():
     # Each attached letter says which syllable it belongs to, so an unmarked
     # syllable is unambiguously untoned -- no count check applies.
-    assert convert("ma\u02e6 ti") == NFC("m\u00e1 ti")
+    assert Convert("ma\u02e6 ti") == NFC("m\u00e1 ti")
 
 
 def test_a_detached_group_fills_a_syllable_an_attached_one_did_not_claim():
-    assert convert("pa ta\u02e7 ka\u02e8 \u02e9") == NFC("p\u0201 t\u0101 k\u00e0")
+    assert Convert("pa ta\u02e7 ka\u02e8 \u02e9") == NFC("p\u0201 t\u0101 k\u00e0")
 
 
 def test_whitespace_orphaned_by_removing_a_tone_section_is_dropped():
-    assert convert("bjo sadu  \u02e7\u02e8  \u02e7 \u02e8") == NFC("bjo\u1dc6 s\u0101d\u00f9")
+    assert Convert("bjo sadu  \u02e7\u02e8  \u02e7 \u02e8") == NFC("bjo\u1dc6 s\u0101d\u00f9")
 
 
 def test_whitespace_between_attached_words_is_kept():
-    assert convert("ma\u02e6 ti\u02e6\u02e8") == NFC("m\u00e1 t\u00ee")
+    assert Convert("ma\u02e6 ti\u02e6\u02e8") == NFC("m\u00e1 t\u00ee")
 
 
 def test_detached_groups_must_fill_the_unmarked_syllables_exactly():
@@ -200,17 +200,17 @@ def test_detached_groups_must_fill_the_unmarked_syllables_exactly():
     # *first* letter here would otherwise shift every tone one syllable left
     # and still look plausible.
     short = "bjo sadu  \u02e7 \u02e8"
-    assert convert(short) == short
+    assert Convert(short) == short
 
 
 # ---------------------------------------------------------------
-# Warnings. convert() stays a plain string-to-string function, so the reasons
+# Warnings. Convert() stays a plain string-to-string function, so the reasons
 # come from convert_with_warnings(); only the CLI writes them to stderr.
 
 
 def test_convert_is_the_first_element_of_convert_with_warnings():
     for text in ["ma\u02e6 ti\u02e6\u02e8", "ka\u02e8\u02e9", "cat"]:
-        assert convert(text) == convert_with_warnings(text)[0]
+        assert Convert(text) == convert_with_warnings(text)[0]
 
 
 @pytest.mark.parametrize("text", ["ma ti", "cat", "", "cat   dog"])

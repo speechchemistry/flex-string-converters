@@ -7,7 +7,7 @@ compatibility: FlexTools module files require Python .NET / IronPython to run fo
 
 # Adding a FlexTools module
 
-A FlexTools module is a thin wrapper that reads a FLEx field, calls a converter's `convert()`, and
+A FlexTools module is a thin wrapper that reads a FLEx field, calls a converter's `Convert()`, and
 reports or writes the result. See [AGENTS.md's FlexTools Module
 Conventions](../../../AGENTS.md#flextools-module-conventions) and [Data
 Safety](../../../AGENTS.md#data-safety) for the rules this procedure follows, and
@@ -34,17 +34,17 @@ This assumes the converter already exists in a project folder (see the
    `<project>/`, it finds `<project>/converters/` automatically. Just change:
 
    ```python
-   from my_converter import convert
+   from my_converter import Convert
    ```
 
-   to your converter's actual module name, e.g. `from diacritics2chao import convert`.
+   to your converter's actual module name, e.g. `from diacritics2chao import Convert`.
 
 3. **Fill in the marked places**: the header comment block (title, one-line purpose, your name, month
    and year, `Platforms: Python .NET and IronPython`), and the `docs` dict (`FTM_Name`,
    `FTM_Synopsis`, `FTM_Description`). Leave `FTM_ModifiesDB: False` and `FTM_Version: 0.1` for now.
 
 4. **Leave `MainFunction` read-only for the first pass.** The template's version reads every entry's
-   lexeme form, calls `convert()`, and reports the result via `report.Info` — it writes nothing and
+   lexeme form, calls `Convert()`, and reports the result via `report.Info` — it writes nothing and
    needs no custom field, so it's safe to run against a real project immediately.
 
 5. **Verify the read-only report**, on any platform, with a project-level test using the stubbed

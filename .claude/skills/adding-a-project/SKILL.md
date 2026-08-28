@@ -32,7 +32,7 @@ section](../../../AGENTS.md#what-this-repository-is). This procedure scaffolds a
    the thing it describes, in the same change.
 
 4. **Write the converter.** Add `<project>/converters/<what_it_converts>.py` following [AGENTS.md's
-   Converter Conventions](../../../AGENTS.md#converter-conventions): a `convert(input_string)`
+   Converter Conventions](../../../AGENTS.md#converter-conventions): a `Convert(input_string)`
    function, a command line interface, and no `flextoolslib` or FieldWorks import.
 
 5. **Write `<project>/tests/conftest.py`.** Adapt `chao-tone-letters/tests/conftest.py`:
@@ -50,7 +50,7 @@ section](../../../AGENTS.md#what-this-repository-is). This procedure scaffolds a
    module — see the [`adding-a-flextools-module`](../adding-a-flextools-module/SKILL.md) skill for
    that.
 
-6. **Write `<project>/tests/test_<what_it_converts>.py`** covering `convert()` directly, per
+6. **Write `<project>/tests/test_<what_it_converts>.py`** covering `Convert()` directly, per
    [AGENTS.md's Testing Approach](../../../AGENTS.md#testing-approach).
 
 7. **Add approval tests once the CLI's output is realistic or awkward to assert inline** — see the
