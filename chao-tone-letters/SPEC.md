@@ -54,7 +54,13 @@ Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in t
 
 Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
 
-**Command line.** Text given as arguments is converted one result per line, in the order given. With no arguments the converter reads standard input line by line and writes one converted line per input line, so it works as a filter in a pipeline. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
+**Attached output.** `convert(input_string, attached=True)`, and equivalently `tone_diacritics_to_attached(input_string)`, writes each unit's tone letters immediately after that unit instead of gathering them into a trailing section: `nə̀jɛ᷅t` → `nə˨jɛ˨˧t`, `bjo᷆ sādù` → `bjo˧˨ sa˧du˨`. The segmentation, the tone-letter values and the adjacent-duplicate collapsing are all exactly as above; only where the letters are written differs. A word with no tone diacritics is returned as it was.
+
+The point of the form is that spacing then carries no meaning at all, so a shell pipeline, a spreadsheet or a copy-paste that collapses runs of spaces or adds a trailing one cannot change how the result reads back — which the trailing section, whose word gaps *are* its meaning, cannot survive. It is therefore the safer form to store in a table column or a FLEx field. It is off by default so that the FLEx Process, the FlexTools module and every existing caller keep the output they already have.
+
+`convert()` keeps its single-argument signature for use as an SIL FLEx Process; `attached` is an optional keyword argument.
+
+**Command line.** Text given as arguments is converted one result per line, in the order given. With no arguments the converter reads standard input line by line and writes one converted line per input line, so it works as a filter in a pipeline. `--attached` selects the attached output described above. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
 
 **Dependencies.** Python 3 and the `regex` package.
 
@@ -101,7 +107,7 @@ Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`, and identically `nə˨jɛ˨˧t` �
 
 **`chao_letters_to_tone_diacritics(base_text, tone_letters)`** places `tone_letters` onto `base_text`'s units as free groups and returns `None` if they don't correspond — useful on its own when spelling and tone letters already come from two separate fields, such as a FlexTools module reading a lexeme form and a `Pitch` field.
 
-**Round-trip status.** `diacritics2chao.py`'s `convert()` followed by this converter's `convert()` returns the original word exactly, for every word that isn't one of the two cases below. This converter's `convert()` followed by `diacritics2chao.py`'s `convert()` is always exact.
+**Round-trip status.** `diacritics2chao.py`'s `convert()` followed by this converter's `convert()` returns the original word exactly, for every word that isn't one of the two cases below — in either of that converter's output forms, the trailing section or `--attached`. This converter's `convert()` followed by `diacritics2chao.py`'s `convert()` is always exact.
 
 What does not round trip: which vowels of a diphthong originally carried a tone diacritic is not recoverable, since a level tone repeated across a diphthong and a level tone written on only one of its vowels produce the same tone letters (`kāi` and `kāī` both give `kai ˧`, and this converter always writes `kāī`), and likewise for a contour written as a single tone diacritic versus one letter per vowel (`kǎi` and `kàí` both give `kai ˨˦`, and this converter always writes `kàí`).
 

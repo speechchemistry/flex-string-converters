@@ -25,6 +25,14 @@ nəjɛt ˨ ˨˧
 olo ˨˦ ˧
 ```
 
+`--attached` writes each tone letter after the syllable it marks instead of in a trailing section. That form carries no meaning in its spacing, so unlike the default it survives a pipeline, spreadsheet or copy-paste that collapses runs of spaces — see the round-trip example under [`chao2diacritics.py`](#chao-tone-lettersconverterschao2diacriticspy) below.
+
+```
+$ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'nə̀jɛ᷅t' 'ǒlō'
+nə˨jɛ˨˧t
+o˨˦lo˧
+```
+
 It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required.
 
 It should also work as a FLEx Process once FLEx allows Python 3 processes (at the time of writing it only allows Python 2 processes, but the developers are working on upgrading this).
@@ -60,6 +68,17 @@ chao2diacritics: line 2: not converted: no tone diacritic for ˨˩: 'ka˨˩'
 ```
 
 The exit status stays 0 when lines warn, so an existing pipeline doesn't start breaking. `convert_with_warnings()` returns those same strings alongside the result for callers that want them, leaving `convert()` a plain string-to-string function.
+
+`diacritics2chao.py --attached` writes the tone letters in this form, which is the safer one to store precisely because its spacing means nothing:
+
+```
+$ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'bjo᷆ sādù'
+bjo˧˨ sa˧du˨
+
+$ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'bjo᷆ sādù' \
+    | tr -s ' ' | python3 chao-tone-letters/converters/chao2diacritics.py
+bjo᷆ sādù
+```
 
 It needs the same `regex` package as `diacritics2chao.py`; FieldWorks is not required. There is no FlexTools module for this direction yet — see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified).
 

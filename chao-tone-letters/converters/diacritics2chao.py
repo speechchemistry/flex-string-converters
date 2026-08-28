@@ -105,7 +105,66 @@ def tone_diacritics_to_chao_letters(input_string):
             word_groups.append(' '.join(groups))
     return '  '.join(word_groups)
 
-def convert(input_string): # function is named "convert" so it can be used as an SIL Flex Process
+def _attached_word(word):
+    # Rewrites one (NFD-normalised) word with each unit's tone letters written
+    # immediately after the unit, instead of gathered into a trailing section.
+    # Segments exactly as _tone_bearing_units() does, but keeps the clusters so
+    # the tone letters can be put back in place.
+    pieces = []
+    current_run = None          # [piece indices, marks] of the open vowel run
+
+    def close_run():
+        nonlocal current_run
+        if current_run is not None:
+            indices, marks = current_run
+            if marks:
+                letters = ''.join(TONE_DIACRITIC_TO_CHAO_LETTERS[mark] for mark in marks)
+                pieces[indices[-1]] += _collapse_adjacent_duplicates(letters)
+            current_run = None
+
+    for cluster in regex.findall(r'\X', word):
+        base = cluster[0]
+        marks = [mark for mark in cluster[1:] if mark in TONE_DIACRITICS]
+        kept = ''.join(ch for ch in cluster if ch not in TONE_DIACRITICS)
+        index = len(pieces)
+        pieces.append(kept)
+        if any(mark in SYLLABIC_MARKS for mark in cluster[1:]):
+            close_run()
+            if marks:
+                letters = ''.join(TONE_DIACRITIC_TO_CHAO_LETTERS[mark] for mark in marks)
+                pieces[index] += _collapse_adjacent_duplicates(letters)
+        elif base in TONE_BEARING_VOWELS:
+            if current_run is None:
+                current_run = [[], []]
+            current_run[0].append(index)
+            current_run[1].extend(marks)
+        elif unicodedata.category(base) == 'Lm':
+            pass
+        else:
+            close_run()
+    close_run()
+    return ''.join(pieces)
+
+def tone_diacritics_to_attached(input_string):
+    # The counterpart of tone_diacritics_to_chao_letters(): the same tone
+    # letters, but written after the syllable each one marks rather than
+    # gathered into a section. Spacing then carries no meaning at all, so a
+    # shell pipeline or spreadsheet that collapses runs of spaces or adds a
+    # trailing one cannot change how the result reads back.
+    input_decomposed = unicodedata.normalize('NFD', input_string)
+    tokens = regex.split(r'(\s+)', input_decomposed)
+    rewritten = [
+        token if token == '' or token.isspace() else _attached_word(token)
+        for token in tokens
+    ]
+    return unicodedata.normalize('NFC', ''.join(rewritten))
+
+def convert(input_string, attached=False): # function is named "convert" so it can be used as an SIL Flex Process
+    # attached=True writes each unit's tone letters after the unit instead of
+    # in a trailing section. It is off by default so that the FLEx Process and
+    # every existing caller keep the output they already have.
+    if attached:
+        return tone_diacritics_to_attached(input_string)
     # ensure string is decomposed into separate code points, so the 13
     # recognised tone diacritics can be removed without disturbing others
     input_decomposed = unicodedata.normalize('NFD',input_string)
@@ -127,6 +186,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Strip tone diacritics to base text and append its "
                     "Chao tone letters, e.g. nə̀jɛ᷅t -> nəjɛt ˨ ˨˧.")
+    parser.add_argument("--attached", action="store_true",
+                        help="write each tone letter after the syllable it "
+                             "marks (ma\u02e6 ti\u02e6\u02e8) instead of in a "
+                             "trailing section (ma ti \u02e6  \u02e6\u02e8); the "
+                             "result carries no meaning in its spacing, so a "
+                             "pipeline or spreadsheet cannot destroy it")
     parser.add_argument("text", nargs="*",
                         help="the text to convert; with no text given, lines "
                              "are read from standard input instead")
@@ -148,7 +213,7 @@ def main():
     else:
         lines = (line.rstrip("\n") for line in sys.stdin)
     for line in lines:
-        print(convert(line))
+        print(convert(line, attached=args.attached))
 
 if __name__ == '__main__':
     main()
