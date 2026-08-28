@@ -60,31 +60,52 @@ Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
 
 ## Tone Diacritics From Chao Tone Letters
 
-Converter: `converters/chao2diacritics.py`. Reverses `converters/diacritics2chao.py`: given base text followed by the Chao tone letters extracted from it, places tone diacritics back onto the tone-bearing units they belong to. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency.
+Converter: `converters/chao2diacritics.py`. Reverses `converters/diacritics2chao.py`: given text carrying Chao tone letters, places tone diacritics back onto the tone-bearing units they belong to. Takes and returns a plain string via `convert()`, needs no FLEx project, and has no `flextoolslib` dependency.
+
+**Where the tone letters may sit.** Anywhere. `convert()` reads the tone letters attached to their syllable (`ma˦ ti˦˨`), gathered into a section before or after the text (`ma ti ˦  ˦˨`, `˦  ˦˨ ma ti`), or a mixture of those, and all of them give the same result. Spacing carries no meaning of its own, so a spreadsheet, a shell pipeline or a copy-paste that collapses runs of spaces or adds a trailing one cannot change the reading.
 
 **Transform of `convert()`.**
 
-1. The input is matched against `^(?P<base>.*?)\s+(?P<tones>[˥-˩][˥-˩ ]*)$` — a non-greedy base so the longest legitimate trailing run of Chao tone letters and spaces wins. No match — including an input that is *entirely* tone letters, with no base text before it — means there is nothing to re-attach, and the input is returned unchanged.
-2. The matched `tones` section is split into per-word groups on runs of two or more spaces, then each word's groups are split into per-unit tone-letter strings on single spaces.
-3. The matched `base` text is walked into tone-bearing units exactly as `diacritics2chao.py`'s `tone_diacritics_to_chao_letters()` does (see that converter's step 2 above), using its own copy of the tone-bearing vowel set and syllabic marks.
-4. Each base-text word's units are matched positionally, in order, against that word's tone-letter groups from step 2. For a unit of *m* tone-bearing clusters receiving a group of *k* tone-letter characters:
-   - the whole group is one of the 13 recognised tone-letter values and *m* = 1 → place that single tone diacritic on the one cluster (`ka ˨˦` → `kǎ`).
-   - *k* = 1 → repeat that tone diacritic on every cluster in the unit (`kai ˧` → `kāī`).
-   - *k* = *m* → place one tone diacritic per cluster, in order (`kai ˨˦` → `kàí`).
+1. The input is NFD-normalised and walked once by grapheme cluster. Every run of adjacent Chao tone letters (`U+02E5`–`U+02E9`) is one **group**, so `˦˨` is a single contour and `˦ ˨` is two groups.
+2. Each group is **attached** or **free**. It is attached when it immediately follows a tone-bearing unit in the same word with no whitespace in between — reaching back over a coda consonant, so `mat˦` marks the `a`. It is free otherwise: preceded by whitespace, or at the start of a word.
+3. The text is walked into tone-bearing units exactly as `diacritics2chao.py`'s `tone_diacritics_to_chao_letters()` does (see that converter's step 2 above), using its own copy of the tone-bearing vowel set and syllabic marks. Chao tone letters are Unicode category `Sk`, not `Lm`, so a tone letter breaks a vowel run rather than being transparent to it: `ma˦i` is two units, not one.
+4. Attached groups bind to the unit they follow. Free groups then fill the units no attached group claimed, in document order. For a unit of *m* tone-bearing clusters receiving a group of *k* tone-letter characters:
+   - the whole group is one of the 13 recognised tone-letter values and *m* = 1 → place that single tone diacritic on the one cluster (`ka˨˦` → `kǎ`).
+   - *k* = 1 → repeat that tone diacritic on every cluster in the unit (`kai˧` → `kāī`).
+   - *k* = *m* → place one tone diacritic per cluster, in order (`kai˨˦` → `kàí`).
    - otherwise → the input is returned unchanged (this is where a contour with no tone diacritic equivalent lands — see below).
 
    The tone diacritic is appended after any marks the cluster already carries, and the whole result is normalised to NFC.
-5. The whole input is returned unchanged, rather than partially converted, whenever: the number of words in the base text doesn't match the number of per-word tone-letter groups; a word's group count doesn't match its unit count; or a unit's group/cluster combination doesn't fit any of step 4's rules. A line that comes back still visibly carrying its tone letters is self-diagnosing.
+5. The tone letters are removed. A whitespace run that separated them is dropped where the removal leaves no surviving text on one side of it, and kept otherwise — so the space inside `ma˦ ti˦˨` survives and the one before a trailing tone section does not.
 
-   Only 8 contours have a tone diacritic equivalent — `˨˦ ˦˨ ˧˦ ˨˧ ˨˦˨ ˧˨ ˦˧ ˦˨˦` — so a contour such as `˨˩` or `˥˩` cannot be placed as a single tone diacritic and always falls into this unchanged case (e.g. `ka ˨˩` → `ka ˨˩`, unchanged) when it is the whole of a one-cluster unit's group.
+**Attached marking may be partial; free groups must fill exactly.** `ma˦ ti` → `má ti`: an attached letter names its own syllable, so an unmarked syllable is unambiguously toneless and no count applies. A free group has only its position to say which syllable it means, so the free groups must match the unmarked units exactly or the whole input is returned unchanged. A partial fill would have to guess that the missing tones are the trailing ones, and when the dropped letter was actually the first, every remaining tone shifts one syllable and the result still looks plausible.
 
-Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`.
+6. The whole input is returned unchanged, rather than partially converted, whenever: the free groups don't match the unmarked units in number; two groups bind to the same unit (`ma˦t˨`); or a group's letters/cluster combination doesn't fit any of step 4's rules. A line that comes back still visibly carrying its tone letters is self-diagnosing.
+
+   Only 8 contours have a tone diacritic equivalent — `˨˦ ˦˨ ˧˦ ˨˧ ˨˦˨ ˧˨ ˦˧ ˦˨˦` — so a contour such as `˨˩` or `˥˩` cannot be placed as a single tone diacritic and always falls into this unchanged case (e.g. `ka˨˩` → `ka˨˩`, unchanged) when it is the whole of a one-cluster unit's group.
+
+Example: `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`, and identically `nə˨jɛ˨˧t` → `nə̀jɛ᷅t`.
+
+**Any Chao tone letter in the input is consumed as a tone mark.** This converter has no trailing-section pattern to match first, so unlike `diacritics2chao.py` — whose step 2 leaves a tone letter already present in the input as ordinary text — it cannot treat one as literal data. Text that needs to carry a Chao tone letter as content is not valid input to this converter.
+
+**Warnings.** `convert_with_warnings(input_string)` returns `(result, warnings)`, where `warnings` is a possibly empty list of plain strings; `convert()` returns just the first element. They are kept apart so that `convert()` writes nothing anywhere: it runs unchanged as an SIL FLEx Process, and a FlexTools module wrapping it must report through the `report` object rather than `print`. The list is not exhaustive, and covers:
+
+| Condition | Message | Converted? |
+| --- | --- | --- |
+| The free groups don't match the unmarked units | `not converted: 2 detached tone letter groups for 3 unmarked syllables` | no |
+| A group has no tone diacritic equivalent | `not converted: no tone diacritic for ˨˩` | no |
+| Two groups bind to one unit | `not converted: two tone letter groups on one syllable` | no |
+| The base text already carries a tone diacritic | `base text already carries a tone diacritic` | yes, but to a doubly marked vowel: `má˨` → `má̀` |
+| The line mixes attached and free groups | `line mixes attached and detached tone letters` | yes, but a free group can reach back past a syllable an attached one claimed: `pa ta˧ ka˨ ˩` → `pȁ tā kà` |
+| Attached marking leaves some units unmarked | `1 of 2 syllables not marked by an attached tone letter` | yes |
+
+**`chao_letters_to_tone_diacritics(base_text, tone_letters)`** places `tone_letters` onto `base_text`'s units as free groups and returns `None` if they don't correspond — useful on its own when spelling and tone letters already come from two separate fields, such as a FlexTools module reading a lexeme form and a `Pitch` field.
 
 **Round-trip status.** `diacritics2chao.py`'s `convert()` followed by this converter's `convert()` returns the original word exactly, for every word that isn't one of the two cases below. This converter's `convert()` followed by `diacritics2chao.py`'s `convert()` is always exact.
 
 What does not round trip: which vowels of a diphthong originally carried a tone diacritic is not recoverable, since a level tone repeated across a diphthong and a level tone written on only one of its vowels produce the same tone letters (`kāi` and `kāī` both give `kai ˧`, and this converter always writes `kāī`), and likewise for a contour written as a single tone diacritic versus one letter per vowel (`kǎi` and `kàí` both give `kai ˨˦`, and this converter always writes `kàí`).
 
-**Command line.** Identical to `diacritics2chao.py`'s: text given as arguments converts one result per line, in the order given; with no arguments the converter reads standard input line by line; results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8.
+**Command line.** Text given as arguments converts one result per line, in the order given; with no arguments the converter reads standard input line by line. Results go to stdout and warnings to stderr, prefixed with the line number and quoting the line: `chao2diacritics: line 2: not converted: no tone diacritic for ˨˩: 'ka˨˩'`. Every input line is written to stdout whether or not it converted, so a column of a table keeps all of its rows, and the exit status stays 0 when lines warn — a warning is a diagnostic, not a failure. stdin, stdout and stderr are all read and written as UTF-8.
 
 **Dependencies.** Python 3 and the `regex` package.
 
@@ -122,5 +143,5 @@ Behaviours that are not pinned down yet. Add to the sections above as each is se
 - Behaviour when an entry has no lexeme form in the default vernacular writing system.
 - Reading a source form from a writing system other than the default vernacular.
 - A FlexTools module wrapping `converters/chao2diacritics.py` to write tone diacritics back onto a FLEx field. Deliberately not built: it would write lexeme forms, a riskier write than `Pitch`. See [`plans/old/chao-tones-per-syllable-and-reverse.md`](../plans/old/chao-tones-per-syllable-and-reverse.md) for the reasoning.
-- Fixtures exercising a diphthong in `chao2diacritics.py`'s approval corpus. There are no attested diphthong forms to hand yet; the unit tests cover the rule in the meantime (see the same plan's Approval corpus section).
+- *Attested* diphthong forms in `chao2diacritics.py`'s approval corpus. Simulated ones now appear in `attached_simulated` and `trailing_spacing_variants_simulated`, both derived from `diacritics2chao.py`'s own `diphthongs_simulated` fixture, so the rule is covered end to end; only real-world diphthong data is still missing (see the same plan's Approval corpus section).
 - Which rule should eventually replace `chao2diacritics.py`'s bail-out on a contour with no tone diacritic equivalent (e.g. `ka ˨˩`). Two alternatives were considered and deferred: duplicating the vowel with one level tone diacritic per step (`ka ˨˩` → `kàȁ`), which changes the base spelling and breaks the round trip; or stacking the level tone diacritics on one vowel, which keeps the spelling but is not conventional notation. See the same plan's "Deferred, and documented" section for the full discussion.

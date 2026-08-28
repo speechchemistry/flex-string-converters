@@ -26,6 +26,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import regex
+
 import pytest
 
 from approval import REPO_ROOT, assert_approved, input_fixtures
@@ -49,5 +51,48 @@ def test_stdin_lines_convert_to_approved_output(input_path, approved_path):
         encoding="utf-8",
     )
 
-    assert result.stderr == ""
+    # stderr carries the warnings, so it is no longer expected to be empty.
+    # The approval artifact stays the stdout one; every stderr line must
+    # still be a warning naming a line of this fixture, so a stray traceback
+    # or debugging print cannot hide among them.
+    for line in result.stderr.splitlines():
+        assert regex.match(r"^chao2diacritics: line \d+: .+: '.*'$", line), line
     assert_approved(TESTS_DIR, CONVERTER_NAME, input_path, approved_path, result.stdout)
+
+
+def test_stdout_carries_every_input_line_even_when_it_warns():
+    # A table's column keeps all of its rows: a line that could not be placed
+    # is written through unchanged rather than dropped.
+    lines = ["ma\u02e6 ti\u02e6\u02e8", "ka\u02e8\u02e9", "cat"]
+    result = subprocess.run(
+        [sys.executable, str(CONVERTER_PATH)],
+        input="\n".join(lines) + "\n",
+        capture_output=True, check=True, cwd=REPO_ROOT, encoding="utf-8",
+    )
+    assert len(result.stdout.splitlines()) == len(lines)
+    assert result.stdout.splitlines()[1] == "ka\u02e8\u02e9"
+
+
+def test_warnings_name_the_line_number_and_the_reason():
+    result = subprocess.run(
+        [sys.executable, str(CONVERTER_PATH)],
+        input="cat\nbjo sadu  \u02e7 \u02e8\nka\u02e8\u02e9\n",
+        capture_output=True, check=True, cwd=REPO_ROOT, encoding="utf-8",
+    )
+    assert result.stderr.splitlines() == [
+        "chao2diacritics: line 2: not converted: 2 detached tone letter groups "
+        "for 3 unmarked syllables: 'bjo sadu  \u02e7 \u02e8'",
+        "chao2diacritics: line 3: not converted: no tone diacritic for "
+        "\u02e8\u02e9: 'ka\u02e8\u02e9'",
+    ]
+
+
+def test_exit_status_stays_zero_when_lines_warn():
+    # Warnings are diagnostics, not failures: an existing pipeline that pipes
+    # this converter must not start breaking because a line did not convert.
+    result = subprocess.run(
+        [sys.executable, str(CONVERTER_PATH)],
+        input="ka\u02e8\u02e9\n",
+        capture_output=True, cwd=REPO_ROOT, encoding="utf-8",
+    )
+    assert result.returncode == 0

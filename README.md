@@ -31,16 +31,35 @@ It should also work as a FLEx Process once FLEx allows Python 3 processes (at th
 
 ### `chao-tone-letters/converters/chao2diacritics.py`
 
-Reverses `diacritics2chao.py`: `convert()` places Chao tone letters back onto their base text as tone diacritics. For example `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. A line that doesn't correspond 1:1 to its tone letters — a word not accounted for, or a contour with no tone diacritic equivalent — is returned unchanged rather than partially converted, so it stays visibly unconverted for review.
+Reverses `diacritics2chao.py`: `convert()` places Chao tone letters back onto their base text as tone diacritics. For example `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`.
+
+**Where the tone letters sit doesn't matter.** They can be attached to their syllable, gathered into a section before or after the text, or a mixture, and all give the same result — so a spreadsheet, a shell pipeline or a copy-paste that collapses runs of spaces or adds a trailing one can't change the reading:
 
 ```
-$ echo 'nəjɛt ˨ ˨˧' | python3 chao-tone-letters/converters/chao2diacritics.py
-nə̀jɛ᷅t
-
-$ python3 chao-tone-letters/converters/chao2diacritics.py 'nəjɛt ˨ ˨˧' 'olo ˨˦ ˧'
-nə̀jɛ᷅t
-ǒlō
+$ python3 chao-tone-letters/converters/chao2diacritics.py \
+    'ma ti ˦  ˦˨'  'ma ti ˦ ˦˨'  'ma˦ ti˦˨'  '˦ma ˦˨ti'
+má tî
+má tî
+má tî
+má tî
 ```
+
+An attached tone letter names its own syllable, so it may mark only some of them: `ma˦ ti` → `má ti`. Detached tone letters have only their position to go on, so they must match the unmarked syllables exactly; a line that doesn't correspond — a syllable not accounted for, or a contour with no tone diacritic equivalent — is returned unchanged rather than partially converted, so it stays visibly unconverted for review.
+
+Mixing the two styles in one line works too (`ma˦ ti ˦˨` → `má tî`), but warns, because a detached group can then reach back past a syllable an attached one already claimed.
+
+Warnings go to stderr with the line number, while every line is still written to stdout so a table keeps all of its rows:
+
+```
+$ printf '%s\n' 'nəjɛt ˨ ˨˧' 'ka˨˩' | python3 chao-tone-letters/converters/chao2diacritics.py 2>warnings.txt
+nə̀jɛ᷅t
+ka˨˩
+
+$ cat warnings.txt
+chao2diacritics: line 2: not converted: no tone diacritic for ˨˩: 'ka˨˩'
+```
+
+The exit status stays 0 when lines warn, so an existing pipeline doesn't start breaking. `convert_with_warnings()` returns those same strings alongside the result for callers that want them, leaving `convert()` a plain string-to-string function.
 
 It needs the same `regex` package as `diacritics2chao.py`; FieldWorks is not required. There is no FlexTools module for this direction yet — see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified).
 
