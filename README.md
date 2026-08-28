@@ -6,6 +6,10 @@ Converters are grouped into **project folders** at the repository root, one per 
 
 These modules are in development. **Please back up your FLEx project before running any of them** — FLEx has no undo across a FlexTools run.
 
+## Running as a FLEx Process
+
+FLEx's Bulk Edit → ... → Process feature can run one of these converters directly on a field's text, with no FlexTools module involved — it calls the converter's `Convert()` function by name (see [AGENTS.md's Converter Conventions](AGENTS.md#converter-conventions)). This runs your system's own Python 3, not one bundled with FLEx, so it needs Python 3 installed and reachable from FLEx, and any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
+
 ## `chao-tone-letters/`
 
 Converting between tone diacritics and Chao tone letters. Not specific to any one language.
@@ -35,7 +39,7 @@ o˨˦lo˧
 
 It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required.
 
-It should also work as a FLEx Process once FLEx allows Python 3 processes (at the time of writing it only allows Python 2 processes, but the developers are working on upgrading this).
+It also works as a FLEx Process — see [Running as a FLEx Process](#running-as-a-flex-process) above.
 
 ### `chao-tone-letters/converters/chao2diacritics.py`
 
@@ -80,7 +84,7 @@ $ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'bjo᷆ sā
 bjo᷆ sādù
 ```
 
-It needs the same `regex` package as `diacritics2chao.py`; FieldWorks is not required. There is no FlexTools module for this direction yet — see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified).
+It needs the same `regex` package as `diacritics2chao.py`; FieldWorks is not required, though it also works as a FLEx Process — see [Running as a FLEx Process](#running-as-a-flex-process) above. There is no FlexTools module for this direction yet — see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified).
 
 ### `chao-tone-letters/Extract_Chao_tone_letters_from_tone_diacritics.py`
 
@@ -142,7 +146,9 @@ rather than passing it through unchanged or dropping it silently.
 Both converters need Python 3 and the `pynini` package (`pip install pynini`). `pynini` has prebuilt
 wheels for Linux; macOS and Windows need conda-forge instead, and Windows has no native wheel at all —
 install via WSL there. There is no FlexTools module for either converter: FlexTools modules run under
-Python .NET/IronPython on Windows, which `pynini` does not support.
+Python .NET/IronPython on Windows, which `pynini` does not support. Both also work as a FLEx Process
+(see [Running as a FLEx Process](#running-as-a-flex-process) above), where the same platform caveats on
+`pynini` apply, since a FLEx Process runs a real Python 3 rather than FlexTools' bundled one.
 
 ## `__Template_converter_module.py`
 
