@@ -19,6 +19,8 @@
 #   found correct. Nothing is ever written into approved/ automatically.
 #
 
+import os
+import pty
 from pathlib import Path
 import subprocess
 import sys
@@ -52,3 +54,26 @@ def test_stdin_lines_convert_to_approved_output(input_path, approved_path):
 
     assert result.stderr == ""
     _assert_approved(input_path, approved_path, result.stdout)
+
+
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="pty is POSIX-only")
+def test_no_arguments_and_no_piped_input_prints_usage_instead_of_hanging():
+    # A real pseudo-terminal, so sys.stdin.isatty() is genuinely true, unlike
+    # a pipe or /dev/null. The timeout is a safety net: if the fix regresses,
+    # this fails fast rather than hanging the test run.
+    controller_fd, terminal_fd = pty.openpty()
+    try:
+        result = subprocess.run(
+            [sys.executable, str(CONVERTER_PATH)],
+            stdin=terminal_fd,
+            capture_output=True,
+            cwd=REPO_ROOT,
+            encoding="utf-8",
+            timeout=5,
+        )
+    finally:
+        os.close(controller_fd)
+        os.close(terminal_fd)
+    assert result.returncode == 2
+    assert result.stdout == ""
+    assert "usage:" in result.stderr

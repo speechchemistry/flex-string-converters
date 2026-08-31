@@ -136,6 +136,7 @@ Module files are the thin FlexTools wrapper around a converter; they are loaded 
   - Write result content only to stdout.
   - Write progress, diagnostics, and errors to stderr.
 - Read and write UTF-8 explicitly rather than leaving it to the console code page, which is not UTF-8 by default on Windows.
+- With no text given as an argument, a script reads standard input as a filter — but only when there is something to read. If no text was given *and* standard input is a terminal (`sys.stdin.isatty()`), the script would otherwise sit blocking on an interactive read that looks like a hang. Fail that case the way argparse already fails a bad argument, via `parser.error(...)`, rather than adding a separate exit path: it prints the one-line usage to stderr and exits 2. A pipe, a redirected file, and `subprocess.run(..., input=...)` all leave `isatty()` false, so this never touches real stdin input.
 
 ## Testing Approach
 

@@ -134,6 +134,12 @@ def parse_arguments():
                         help="the text to convert; with no text given, lines "
                              "are read from standard input instead")
     args = parser.parse_args()
+    if not args.text and sys.stdin.isatty():
+        # Otherwise this looks like a hang: no arguments and no piped input
+        # means there is nothing to read, so fail the way argparse already
+        # fails a bad argument, rather than blocking on an interactive read.
+        parser.error("no text given and standard input is a terminal; "
+                     "pass text as arguments, or pipe/redirect input instead")
     return args
 
 def use_utf8(*streams):
