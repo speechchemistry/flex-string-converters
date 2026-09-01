@@ -38,3 +38,8 @@ TDD, red before green:
 - `python -m pytest` from the repo root, confirming the new tests pass and nothing else regresses.
 - Manual CLI checks: piped input, argument input, and the real-pseudo-terminal no-input case, mirroring what was done for the sibling converters' isatty fix.
 - Real FLEx verification is out of scope for this sandbox and is the user's own follow-up step before relying on this in production.
+
+## Changes after approval
+
+- Verified against a real FLEx Process (2026-09-01): it resolves the wrapper's import of `diacritics2chao` correctly, so the "PROVISIONAL" caveat in the wrapper's header comment and the real-FLEx-verification item in Verification above are resolved. The header comment now records the verification instead.
+- On reflection after the fact, the wrapper's CLI was dropped entirely, along with `test_diacritics2chao_attached_cli.py`: `diacritics2chao.py --attached` already exposes the identical behaviour, so a second CLI here was pure duplication with nothing to test beyond what that CLI's own tests already cover. `AGENTS.md`'s Converter Conventions gained a carve-out for this case (a pure forwarding wrapper needs no CLI when its sibling's already exposes the same behaviour), since the user indicated a second such wrapper (for `tone_diacritics_to_chao_letters()`) is likely, and the rule should be settled once rather than decided ad hoc each time.

@@ -13,14 +13,15 @@
 #   full transform rules -- Convert() here forwards to its
 #   Convert(input_string, attached=True) and has no rules of its own.
 #
-#   PROVISIONAL: this is the first converter in this repository that imports
-#   another converter, since every other one is deliberately self-contained
-#   so it can stand alone as a FLEx Process. The sys.path technique below
-#   mirrors the one already proven for a FlexTools module reaching its
-#   project's converters/ (see AGENTS.md's FlexTools Module Conventions),
-#   but whether a raw FLEx Process resolves this import the same way has not
-#   been verified against real FieldWorks. Smoke-test this against a real
-#   FLEx Process before relying on it.
+#   Verified against a real FLEx Process (2026-09-01): a raw Process can be
+#   pointed directly at this file and resolves its import of diacritics2chao
+#   correctly.
+#
+#   No command line interface: python3 diacritics2chao.py --attached already
+#   does exactly this from the command line, so a second CLI here would only
+#   duplicate it. This file's only reason to exist is to give FLEx's Process
+#   dialog a file to point at -- see AGENTS.md's Converter Conventions for
+#   the carve-out this relies on.
 #
 #   Tim Kempton
 #   September 2026
@@ -29,7 +30,6 @@
 #
 
 import sys
-import argparse
 import os
 
 # diacritics2chao.py lives in this same converters/ directory. A FLEx
@@ -42,46 +42,3 @@ import diacritics2chao
 
 def Convert(input_string): # function is named "Convert" so it can be used as an SIL Flex Process
     return diacritics2chao.Convert(input_string, attached=True)
-
-
-#----------------------------------------------------------------
-# Command line interface
-
-def parse_arguments():
-    """Converts tone diacritics to Chao tone letters attached to their syllable"""
-    parser = argparse.ArgumentParser(
-        description="Convert tone diacritics to Chao tone letters attached "
-                    "to the syllable they mark, e.g. nə̀jɛ᷅t -> nə˨jɛ˨˧t. "
-                    "Equivalent to diacritics2chao.py --attached; see that "
-                    "script for the trailing-section form.")
-    parser.add_argument("text", nargs="*",
-                        help="the text to convert; with no text given, lines "
-                             "are read from standard input instead")
-    args = parser.parse_args()
-    if not args.text and sys.stdin.isatty():
-        # Otherwise this looks like a hang: no arguments and no piped input
-        # means there is nothing to read, so fail the way argparse already
-        # fails a bad argument, rather than blocking on an interactive read.
-        parser.error("no text given and standard input is a terminal; "
-                     "pass text as arguments, or pipe/redirect input instead")
-    return args
-
-def use_utf8(*streams):
-    # The output is IPA and Chao tone letters, so don't leave the encoding to
-    # the console code page (which is not UTF-8 by default on Windows)
-    for stream in streams:
-        if hasattr(stream, "reconfigure"):
-            stream.reconfigure(encoding="utf-8")
-
-def main():
-    args = parse_arguments()
-    use_utf8(sys.stdin, sys.stdout)
-    if args.text:
-        lines = args.text
-    else:
-        lines = (line.rstrip("\n") for line in sys.stdin)
-    for line in lines:
-        print(Convert(line))
-
-if __name__ == '__main__':
-    main()
