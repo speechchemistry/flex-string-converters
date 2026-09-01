@@ -39,7 +39,7 @@ o˨˦lo˧
 
 It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required.
 
-It also works as a FLEx Process — see [Running as a FLEx Process](#running-as-a-flex-process) above.
+It also works as a FLEx Process — see [Running as a FLEx Process](#running-as-a-flex-process) above. A raw FLEx Process has no way to pass `--attached`, since it always calls a bare `Convert(input_string)`; point it at `chao-tone-letters/converters/diacritics2chao_attached.py` instead to get attached output that way — a thin wrapper with no rules of its own, equivalent to `diacritics2chao.py --attached`.
 
 ### `chao-tone-letters/converters/chao2diacritics.py`
 

@@ -58,7 +58,7 @@ Example: `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`.
 
 The point of the form is that spacing then carries no meaning at all, so a shell pipeline, a spreadsheet or a copy-paste that collapses runs of spaces or adds a trailing one cannot change how the result reads back — which the trailing section, whose word gaps *are* its meaning, cannot survive. It is therefore the safer form to store in a table column or a FLEx field. It is off by default so that the FLEx Process, the FlexTools module and every existing caller keep the output they already have.
 
-`Convert()` keeps its single-argument signature for use as an SIL FLEx Process; `attached` is an optional keyword argument.
+`Convert()` keeps its single-argument signature for use as an SIL FLEx Process; `attached` is an optional keyword argument. A raw FLEx Process always calls a bare `Convert(input_string)` with no keyword arguments, so it has no way to select `attached=True` this way — `converters/diacritics2chao_attached.py` exists for that case: a thin wrapper with no transform rules of its own, whose `Convert(input_string)` forwards to this converter's `Convert(input_string, attached=True)`, so a FLEx Process gets attached output by being pointed at that file instead of this one.
 
 **Command line.** Text given as arguments is converted one result per line, in the order given. With no arguments the converter reads standard input line by line and writes one converted line per input line, so it works as a filter in a pipeline. `--attached` selects the attached output described above. Results go to stdout and diagnostics to stderr; stdin and stdout are both read and written as UTF-8 regardless of the console's own encoding.
 
