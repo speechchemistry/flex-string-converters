@@ -45,6 +45,8 @@ Converter: `converters/diacritics2chao.py`. Takes and returns a plain string via
 
 Example: `[nə̀jɛ᷅t]` → `˨ ˨˧`. A Chao tone letter already present in the input and not derived from any tone diacritic — e.g. a bare `˥` — is ordinary text as far as step 2's unit walk is concerned, so it collapses away like any other non-vowel, non-syllabic character: `tone_diacritics_to_chao_letters("˥")` → `""`.
 
+A raw FLEx Process always calls a bare `Convert(input_string)` with no keyword arguments, so it has no way to reach `tone_diacritics_to_chao_letters()` directly — `converters/diacritics2chao_tone_letters_only.py` exists for that case: a thin wrapper with no transform rules of its own, whose `Convert(input_string)` forwards to this function, so a FLEx Process gets the tone-letters-only extraction by being pointed at that file.
+
 **Transform of `Convert()`.** This is the converter's public entry point (used by the CLI, as a FLEx Process, and by the FlexTools module below).
 
 1. The input is normalised to NFD.
