@@ -1,6 +1,7 @@
 # flex-string-converters
 
-![](cropped_flex_demo.png)
+<img src="images/cropped_flex_demo.png" align="right" width="841">
+
 
 String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
 
@@ -12,7 +13,7 @@ These modules are in development. **Please back up your FLEx project before runn
 
 FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text.
 
-<video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls" poster="flex_demo_of_diacritics2chao_tone_letters_only.png"></video>
+<video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls"></video>
 
 This walkthrough shows the Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
 
@@ -24,7 +25,7 @@ Converting between tone diacritics and Chao tone letters. Not specific to any on
 
 ### `diacritics2chao.py`
 
-![](diacritics2chao_black_box.svg)
+![](images/diacritics2chao_black_box.svg)
 
 Strips tone diacritics from the input and appends its Chao tone letters, e.g. `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. As a FLEx Process this is the `diacritics2chao` process. Point at `diacritics2chao_attached.py` instead for the `--attached` form below, or `diacritics2chao_tone_letters_only.py` for the tone letters alone with no base text.
 
@@ -41,7 +42,7 @@ It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone
 
 ### `chao2diacritics.py`
 
-![](chao2diacritics_black_box.svg)
+![](images/chao2diacritics_black_box.svg)
 
 Reverses `diacritics2chao.py`: places Chao tone letters back onto their base text as tone diacritics, e.g. `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. As a FLEx Process this is the `chao2diacritics` process.
 
