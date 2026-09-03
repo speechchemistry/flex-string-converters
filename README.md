@@ -8,15 +8,17 @@ That's possible because every converter is a plain Python 3 file with a `Convert
 
 These modules are in development. **Please back up your FLEx project before running any of them** — FLEx has no undo across a FlexTools run.
 
-## Running as a FLEx Process
+## Installation
+
+To install [this repository](https://github.com/speechchemistry/flex-string-converters), scroll up to the green code box, click it and then click Download ZIP. You can then extract it on your computer (e.g. from the Downloads folder).
+
+You will need to ensure that Python is installed on your computer. You will also need to install any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
 
 FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text.
 
 <video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls"></video>
 
 This walkthrough shows the Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
-
-This runs your system's own Python 3, not one bundled with FLEx, so it needs Python 3 installed and reachable from FLEx, and any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
 
 ## `chao-tone-letters/`
 
