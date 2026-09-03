@@ -1,7 +1,6 @@
 # flex-string-converters
 
-<img src="images/cropped_flex_demo.png" align="right" width="841">
-
+<img src="images/cropped_flex_demo.png" width="841" style="max-width: 100%;">
 
 String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
 
