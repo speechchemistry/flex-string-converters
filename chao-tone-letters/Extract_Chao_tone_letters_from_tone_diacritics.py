@@ -10,6 +10,9 @@
 #
 #   Platforms: Python .NET and IronPython
 #
+#   Contains code fragments by C D Farrow; this file (only, not the
+#   rest of the repository) is licensed under LGPL 2.1 as a result.
+#
 
 from flextoolslib import *
 

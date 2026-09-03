@@ -1,6 +1,8 @@
 # flex-string-converters
 
-String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and — for the ones with a module file — as a [FlexTools](https://github.com/cdfarrow/flextools) module that walks the whole lexicon with richer reporting.
+![](cropped_flex_demo.png)
+
+String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
 
 That's possible because every converter is a plain Python 3 file with a `Convert()` function that takes a string and returns a string, with no FieldWorks dependency. Converters are grouped into **project folders** at the repository root, one per topic or language community — `chao-tone-letters/` below is the main one in active use; `zhire/` mainly illustrates what's possible for a specific language's own orthography.
 
@@ -8,11 +10,11 @@ These modules are in development. **Please back up your FLEx project before runn
 
 ## Running as a FLEx Process
 
-FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text, with no FlexTools installation involved. Pick a source and target field, choose the converter from the Process list (using Setup… to point it at the converter file if it isn't listed yet), and Apply:
+FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text.
 
 <video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls" poster="flex_demo_of_diacritics2chao_tone_letters_only.png"></video>
 
-This walkthrough shows the Zhire lexicon's Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
+This walkthrough shows the Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
 
 This runs your system's own Python 3, not one bundled with FLEx, so it needs Python 3 installed and reachable from FLEx, and any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
 
@@ -24,7 +26,7 @@ Converting between tone diacritics and Chao tone letters. Not specific to any on
 
 ![](diacritics2chao_black_box.svg)
 
-Strips tone diacritics from the input and appends its Chao tone letters, e.g. `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. As a FLEx Process this is the `diacritics2chao` process. Point at `diacritics2chao_attached.py` instead for the `--attached` form below, or `diacritics2chao_tone_letters_only.py` for the tone letters alone with no base text — a raw FLEx Process always calls a bare `Convert(input_string)`, so these thin wrapper files are how it reaches those variants.
+Strips tone diacritics from the input and appends its Chao tone letters, e.g. `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. As a FLEx Process this is the `diacritics2chao` process. Point at `diacritics2chao_attached.py` instead for the `--attached` form below, or `diacritics2chao_tone_letters_only.py` for the tone letters alone with no base text.
 
 `--attached` writes each tone letter after the syllable it marks instead of gathering them into a trailing section. That form carries no meaning in its spacing, so unlike the default it survives a pipeline, spreadsheet or copy-paste that collapses runs of spaces:
 
@@ -35,15 +37,15 @@ nə˨jɛ˨˧t
 
 It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required to run it from the command line.
 
-It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone_diacritics.py`, which runs it over every lexeme form in the lexicon and writes the result into a custom `Pitch` field — see [chao-tone-letters/SPEC.md](chao-tone-letters/SPEC.md) for its prerequisites (a `Pitch` custom field, the vernacular writing system) and what it does to existing `Pitch` values.
+It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone_diacritics.py` to demonstrate how these converters can be used with FlexTools.
 
 ### `chao2diacritics.py`
 
 ![](chao2diacritics_black_box.svg)
 
-Reverses `diacritics2chao.py`: places Chao tone letters back onto their base text as tone diacritics, e.g. `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. As a FLEx Process this is the `chao2diacritics` process — there is no FlexTools module for this direction yet (see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified)).
+Reverses `diacritics2chao.py`: places Chao tone letters back onto their base text as tone diacritics, e.g. `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. As a FLEx Process this is the `chao2diacritics` process.
 
-Where the tone letters sit doesn't matter — attached to their syllable, gathered before or after the text, or a mixture all give the same result — so a spreadsheet or copy-paste that collapses or adds spaces can't change the reading. A line that doesn't correspond to a valid tone-letter reading (an unaccounted syllable, or a contour with no diacritic equivalent) is returned unchanged rather than partially converted, with a warning to stderr naming the line, so the exit status stays 0 and an existing pipeline doesn't break:
+Where the tone letters sit doesn't matter — attached to their syllable, gathered before or after the text, or a mixture all give the same result. A line that doesn't correspond to a valid tone-letter reading (an unaccounted syllable, or a contour with no diacritic equivalent) is returned unchanged rather than partially converted, with a warning to stderr naming the line, so the exit status stays 0 and an existing pipeline doesn't break:
 
 ```
 $ python3 chao-tone-letters/converters/chao2diacritics.py 'ma ti ˦  ˦˨' 'ma˦ ti˦˨'
@@ -59,7 +61,7 @@ A second, smaller project — mainly here to illustrate what's possible for a la
 
 `phonetic2phonemic.py` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic transcription into a phonemic one, e.g. `ɲápsə́` → `njápsə́` (the `phonetic2phonemic` FLEx Process). `phonemic2orthography.py` then strips tone diacritics (the orthography has no tone-marking convention yet) and maps the phonemic string to its orthographic spelling, e.g. `hwōrì` → `whori` (the `phonemic2orthography` FLEx Process). Both raise an error naming the offending input if a symbol or sequence isn't covered, rather than passing it through unchanged or dropping it silently.
 
-Both need Python 3 and the `pynini` package (`pip install pynini`) — prebuilt wheels exist for Linux; macOS and Windows need conda-forge, and Windows has no native wheel at all (install via WSL there). There is no FlexTools module for either, since FlexTools runs under Python .NET/IronPython on Windows and `pynini` doesn't support that — but both still work as a FLEx Process, subject to the same platform caveats, since a FLEx Process runs a real Python 3 rather than FlexTools' bundled one.
+Both need Python 3 and the `pynini` package (`pip install pynini`) — prebuilt wheels exist for Linux; macOS and Windows need conda-forge, and Windows has no native wheel at all (install via WSL there).
 
 ## Adding a new converter
 
@@ -77,8 +79,7 @@ Run `python -m pytest` from the repository root, which discovers every project's
 
 `diacritics2chao.py`'s and `chao2diacritics.py`'s CLIs are additionally covered end to end by approval tests — input fixtures and their approved outputs under each converter's `tests/fixtures/<converter>/`, compared exactly with no scrubbing or Unicode normalisation. See [AGENTS.md's Testing Approach](AGENTS.md#testing-approach) for the full convention, and the [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) skill for adding a fixture or approving a changed one.
 
-## Related
+## License
 
-`Extract_Chao_tone_letters_from_tone_diacritics.py` was extracted from [flextools_modules](https://github.com/speechchemistry/flextools_modules), which keeps a mirrored copy for now (still under this module's old name). **This repository is the canonical one.** Modules that walk the FLEx model rather than transform a string — such as `Fix_Pronunciation_Media_Paths.py` — stay there.
+MIT — see [LICENSE](LICENSE). The one exception is `chao-tone-letters/Extract_Chao_tone_letters_from_tone_diacritics.py`, which incorporates code fragments by C D Farrow and is licensed under LGPL 2.1 instead; see that file's header.
 
-Attributions: This repository includes code from C D Farrows (licensed under LGPL 2.1) in `Extract_Chao_tone_letters_from_tone_diacritics.py`, so that file's licence is LGPL 2.1. Please see the source code for more attribution information.
