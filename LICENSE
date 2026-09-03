@@ -19,8 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-One file is an exception to the above: chao-tone-letters/Extract_Chao_tone_letters_from_tone_diacritics.py
-incorporates code fragments by C D Farrow and is licensed under the GNU
-Lesser General Public License version 2.1 instead — see that file's header
-and README.md's Attributions section.
