@@ -22,6 +22,8 @@ Converting between tone diacritics and Chao tone letters. Not specific to any on
 
 ### `diacritics2chao.py`
 
+![](diacritics2chao_black_box.svg)
+
 Strips tone diacritics from the input and appends its Chao tone letters, e.g. `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. As a FLEx Process this is the `diacritics2chao` process. Point at `diacritics2chao_attached.py` instead for the `--attached` form below, or `diacritics2chao_tone_letters_only.py` for the tone letters alone with no base text — a raw FLEx Process always calls a bare `Convert(input_string)`, so these thin wrapper files are how it reaches those variants.
 
 `--attached` writes each tone letter after the syllable it marks instead of gathering them into a trailing section. That form carries no meaning in its spacing, so unlike the default it survives a pipeline, spreadsheet or copy-paste that collapses runs of spaces:
@@ -36,6 +38,8 @@ It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is n
 It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone_diacritics.py`, which runs it over every lexeme form in the lexicon and writes the result into a custom `Pitch` field — see [chao-tone-letters/SPEC.md](chao-tone-letters/SPEC.md) for its prerequisites (a `Pitch` custom field, the vernacular writing system) and what it does to existing `Pitch` values.
 
 ### `chao2diacritics.py`
+
+![](chao2diacritics_black_box.svg)
 
 Reverses `diacritics2chao.py`: places Chao tone letters back onto their base text as tone diacritics, e.g. `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. As a FLEx Process this is the `chao2diacritics` process — there is no FlexTools module for this direction yet (see [chao-tone-letters/SPEC.md's Not Yet Specified section](chao-tone-letters/SPEC.md#not-yet-specified)).
 

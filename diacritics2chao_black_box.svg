@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 145" width="720" height="145">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+    </marker>
+
+    <g id="fn-box">
+      <rect x="250" y="0" width="220" height="50" rx="6" class="fn-box"/>
+      <text x="360" y="25" text-anchor="middle" dominant-baseline="middle" class="blackbox-title">diacritics2chao.py</text>
+    </g>
+
+    <line id="input-arrow" x1="180" y1="25" x2="247" y2="25" class="conn" marker-end="url(#arrow)"/>
+    <line id="output-arrow" x1="470" y1="25" x2="537" y2="25" class="conn" marker-end="url(#arrow)"/>
+  </defs>
+
+  <style>
+    .code-text { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 15px; font-weight: 600; fill: #0f172a; }
+    .blackbox-title { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 15px; font-weight: 600; fill: #ffffff; }
+    .output-text { fill: #15803d; }
+
+    .input-box { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 2; }
+    .fn-box { fill: #0f172a; stroke: #020617; stroke-width: 2; }
+    .output-box { fill: #f0fdf4; stroke: #86efac; stroke-width: 2; }
+    .conn { stroke: #64748b; stroke-width: 2; }
+  </style>
+
+  <!-- diacritics2chao.py("xɛ̃̀ɾī") -->
+  <g transform="translate(0, 10)">
+    <rect x="0" y="0" width="180" height="50" rx="6" class="input-box"/>
+    <text x="90" y="25" text-anchor="middle" dominant-baseline="middle" class="code-text">xɛ̃̀ɾī</text>
+    <use href="#input-arrow"/>
+
+    <use href="#fn-box"/>
+    <use href="#output-arrow"/>
+
+    <rect x="540" y="0" width="180" height="50" rx="6" class="output-box"/>
+    <text x="630" y="25" text-anchor="middle" dominant-baseline="middle" class="code-text output-text">xɛ̃ɾi ˨ ˧</text>
+  </g>
+
+  <!-- diacritics2chao.py("m̩̄pa᷆d") -->
+  <g transform="translate(0, 85)">
+    <rect x="0" y="0" width="180" height="50" rx="6" class="input-box"/>
+    <text x="90" y="25" text-anchor="middle" dominant-baseline="middle" class="code-text">m̩̄pa᷆d</text>
+    <use href="#input-arrow"/>
+
+    <use href="#fn-box"/>
+    <use href="#output-arrow"/>
+
+    <rect x="540" y="0" width="180" height="50" rx="6" class="output-box"/>
+    <text x="630" y="25" text-anchor="middle" dominant-baseline="middle" class="code-text output-text">m̩pad ˧ ˧˨</text>
+  </g>
+</svg>
