@@ -10,9 +10,9 @@ These modules are in development. **Please back up your FLEx project before runn
 
 FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text, with no FlexTools installation involved. Pick a source and target field, choose the converter from the Process list (using Setup… to point it at the converter file if it isn't listed yet), and Apply:
 
-![FLEx's Bulk Edit Entries, with the Process tab set up to run diacritics2chao_tone_letters_only over the Zhire lexicon's phonetic field](flex_demo_of_diacritics2chao_tone_letters_only.png)
+<video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls" poster="flex_demo_of_diacritics2chao_tone_letters_only.png"></video>
 
-This screenshot shows the Zhire lexicon's Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
+This walkthrough shows the Zhire lexicon's Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
 
 This runs your system's own Python 3, not one bundled with FLEx, so it needs Python 3 installed and reachable from FLEx, and any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
 
