@@ -16,7 +16,7 @@ You will need to ensure that Python is installed on your computer. You will also
 
 FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text.
 
-<video src="https://github.com/user-attachments/assets/32b37ca9-f33d-4f32-b0e4-00abb7b44a55" controls="controls"></video>
+<video src="https://github.com/user-attachments/assets/8f6cf6a8-01c9-45f7-96ca-168f3232d0a3" controls="controls"></video>
 
 This walkthrough shows the Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
 
