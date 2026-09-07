@@ -63,7 +63,7 @@ Example: `hwōrì` → `whori` (tone stripped, `hw` override applied). `ɔ̃ː` 
 
   This fixture is what makes the inventory claims above exhaustive rather than illustrative. It exists because three phonemes (`/l/`, `/tʃ/`, `/ŋmɡb/`) were each found missing one at a time, by a held-out word or by a human reading the source, after a 99/99 pass against the sample corpus had been mistaken for a completeness check.
 
-**Dependencies.** Python 3 and the `pynini` package.
+**Dependencies.** Python 3 and the `pynini` package — see [Installing Pynini](#installing-pynini) for per-platform installation, including a Windows-specific caveat for the FLEx Process case.
 
 ## Phonetic Transcription To Phonemic Transcription
 
@@ -98,7 +98,16 @@ Example: `ɲápsə́` → `njápsə́` (reanalysis applied). `nd͡ʒa` → `ndza
 
   Six rows originally disagreed with `Convert()`'s output and were reviewed with the user (2026-09-01) rather than held out. Two are the `ɲ`/`nj` words above. `nzo᷇ɾ` 'chin' had an emic field (`nzo᷇r`) that predates the `nz → ndz` rule (assertion 3) being applied consistently; confirmed and now expected as `ndzo᷇r`. `kɨ́kjōɾākàp` 'river molluscs; shells' had an emic field (`kjukjōrɔ̄ kàp`) that read as a different transcription of the word rather than the regular rules applied to it; confirmed and now expected as the regular output, `kə́kjōrākàp`. The remaining two are the etic corrections above.
 
-**Dependencies.** Python 3 and the `pynini` package.
+**Dependencies.** Python 3 and the `pynini` package — see [Installing Pynini](#installing-pynini) for per-platform installation, including a Windows-specific caveat for the FLEx Process case.
+
+## Installing Pynini
+
+Both converters above need [pynini](https://pypi.org/project/pynini/), which wraps the compiled OpenFst library rather than being pure Python, so installing it is platform-dependent.
+
+- **Linux**: PyPI publishes prebuilt wheels — `pip install pynini` works directly.
+- **macOS and Windows**: PyPI publishes no wheel for either. Install from conda-forge instead — `conda install -c conda-forge pynini` (via a plain `conda`/Miniforge install pulling only from the conda-forge channel; Anaconda Inc.'s own `defaults` channel carries a separate commercial-use Terms of Service that conda-forge is not subject to).
+- **Windows, running as a FLEx Process specifically**: FLEx's Python 3 Script setup loads the interpreter by calling `LoadLibrary` directly on the `pythonXY.dll` path you give it, rather than spawning `python.exe` as a subprocess, so it never goes through conda's own environment activation — the mechanism that normally makes a conda environment's compiled dependencies (here, OpenFst's shared library) resolvable at runtime. Without it, FLEx's DLL load fails with an opaque error naming the DLL but not the real cause (`Could not load ...\python312.dll ... The specified module could not be found`). The fix is to make the environment's own folder (e.g. `...\miniforge3\envs\<name>`, which is also where you'll find the `pythonXY.dll` itself to point FLEx's Python3 DLL path field at — e.g. `...\miniforge3\envs\pynini-test\python312.dll`) resolvable on `PATH`, since `PATH` is one of the locations Windows searches when an external process loads a DLL directly. Scope that addition to a wrapper that launches FLEx specifically, rather than to the whole account's permanent `PATH`, to avoid it silently shadowing something else system-wide.
+- Command-line use of either converter on Windows has none of the caveat above: running `python.exe` directly always searches its own folder first, so a conda install works immediately with no `PATH` change needed. WSL is not a substitute for the FLEx Process case above — FLEx loads a native Windows DLL in-process, and a Windows process cannot load a Linux shared library that way.
 
 ## Not Yet Specified
 

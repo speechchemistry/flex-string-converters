@@ -14,7 +14,7 @@ To install [this repository](https://github.com/speechchemistry/flex-string-conv
 
 You will need to ensure that Python is installed on your computer. You will also need to install any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
 
-FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text.
+FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text. Setting one up (Bulk Edit → Process → Python 3 Script) means pointing its **Python script file** field at the converter's `.py` file, and its **Python3 DLL path** field at a `pythonXY.dll` from the same Python 3 install where that converter's packages were installed — e.g. `...\AppData\Local\Programs\Python\Python312\python312.dll` for a plain python.org install, or a specific conda environment's own copy when a converter needs a package only installable that way (see [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini)).
 
 <video src="https://github.com/user-attachments/assets/8f6cf6a8-01c9-45f7-96ca-168f3232d0a3" controls="controls"></video>
 
@@ -63,7 +63,7 @@ A second, smaller project — mainly here to illustrate what's possible for a la
 
 `phonetic2phonemic.py` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic transcription into a phonemic one, e.g. `ɲápsə́` → `njápsə́` (the `phonetic2phonemic` FLEx Process). `phonemic2orthography.py` then strips tone diacritics (the orthography has no tone-marking convention yet) and maps the phonemic string to its orthographic spelling, e.g. `hwōrì` → `whori` (the `phonemic2orthography` FLEx Process). Both raise an error naming the offending input if a symbol or sequence isn't covered, rather than passing it through unchanged or dropping it silently.
 
-Both need Python 3 and the `pynini` package (`pip install pynini`) — prebuilt wheels exist for Linux; macOS and Windows need conda-forge, and Windows has no native wheel at all (install via WSL there).
+Both need Python 3 and the `pynini` package — prebuilt wheels exist on PyPI for Linux only (`pip install pynini`); macOS and Windows need conda-forge instead (`conda install -c conda-forge pynini`), with an extra step on Windows specifically for the FLEx Process case — see [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini).
 
 ## Adding a new converter
 
