@@ -4,21 +4,17 @@
 
 String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
 
-That's possible because every converter is a plain Python 3 file with a `Convert()` function that takes a string and returns a string, with no FieldWorks dependency. Converters are grouped into **project folders** at the repository root, one per topic or language community — `chao-tone-letters/` below is the main one in active use; `zhire/` mainly illustrates what's possible for a specific language's own orthography.
-
-These modules are in development. **Please back up your FLEx project before running any of them** — FLEx has no undo across a FlexTools run.
+These modules are in development. **Please back up your FLEx project before running any of them**.
 
 ## Installation
 
 To install [this repository](https://github.com/speechchemistry/flex-string-converters), scroll up to the green code box, click it and then click Download ZIP. You can then extract it on your computer (e.g. from the Downloads folder).
 
-You will need to ensure that Python is installed on your computer. You will also need to install any third-party package the chosen converter needs — `regex` for the `chao-tone-letters` converters, `pynini` for the `zhire` ones — installed into that same Python 3 with `pip install <package>` first. Each converter's section below names the packages it needs.
-
-FLEx's own Bulk Edit → Process feature can run one of these converters directly on a field's text. Setting one up (Bulk Edit → Process → Python 3 Script) means pointing its **Python script file** field at the converter's `.py` file, and its **Python3 DLL path** field at a `pythonXY.dll` from the same Python 3 install where that converter's packages were installed — e.g. `...\AppData\Local\Programs\Python\Python312\python312.dll` for a plain python.org install, or a specific conda environment's own copy when a converter needs a package only installable that way (see [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini)).
+You will need to ensure that [Python](https://www.python.org/downloads/) is installed on your computer. You will also need to install any third-party package the chosen converter needs, for example type `pip install regex` for the `chao-tone-letters` converters. Each converter's section below names the packages it needs.
 
 <video src="https://github.com/user-attachments/assets/8f6cf6a8-01c9-45f7-96ca-168f3232d0a3" controls="controls"></video>
 
-This walkthrough shows the Bulk Edit Entries view, with the Process tab populating a blank `Lexeme Form (zhiTn)` field from the phonetic `Lexeme Form (zhiPt)` field, using the `diacritics2chao_tone_letters_only` process — one of `chao-tone-letters/`'s converters, described below.
+This video shows how to use the Bulk Edit Entries → Process → Setup... to setup the `diacritics2chao_tone_letters_only` process (one of `chao-tone-letters/`'s converters). It is just a case of specifying the Python script file and the Python DLL file. (It is best not to use different DLL files in one Flex session as you might need to restart Flex to use each different module) 
 
 ## `chao-tone-letters/`
 
