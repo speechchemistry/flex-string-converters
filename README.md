@@ -53,6 +53,23 @@ má tî
 
 It needs the same `regex` package as `diacritics2chao.py`.
 
+## `cv-patterns/`
+
+Turning a phonemic (or phonetic) transcription into its CV pattern. Not specific to any one language, and deliberately small: the output alphabet is just `C` and `V`. 
+
+### `phonemes2cv.py`
+
+Turns a transcription into its consonant/vowel pattern, e.g. `nə̀jɛt` → `CVCVC`. As a FLEx Process this is the `phonemes2cv` process. Tone diacritics and tone letters (including `diacritics2chao.py`'s own output) are recognised and contribute nothing, so the two projects compose:
+
+```
+$ python3 cv-patterns/converters/phonemes2cv.py 'nəjɛt ˨ ˨˧'
+CVCVC
+```
+
+A tie bar joins two symbols into one phone (`t͡ʃa` → `CV`); without one, the same letters are two phones (`tʃa` → `CCV`). That is a deliberate choice for now, not a bug. An unrecognised symbol becomes `?` with a warning produced in the command line version.
+
+It needs Python 3 and the [`segments`](https://pypi.org/project/segments/) package (`pip install segments`), the orthography-profile tokeniser from Moran & Cysouw's Unicode Cookbook.
+
 ## `zhire/`
 
 A second, smaller project — mainly here to illustrate what's possible for a language with its own orthography, rather than the day-to-day tool the `chao-tone-letters/` converters above are. It converts a Zhire `[zhi]` phonetic or phonemic transcription to its orthographic spelling; the two converters compose: phonetic → phonemic → orthography.
@@ -80,4 +97,6 @@ Run `python -m pytest` from the repository root, which discovers every project's
 ## License
 
 MIT — see [LICENSE](LICENSE). The one exception is `chao-tone-letters/Extract_Chao_tone_letters_from_tone_diacritics.py`, which incorporates code fragments by C D Farrow and is licensed under LGPL 2.1 instead; see that file's header.
+
+**Attributions:** `cv-patterns/converters/cv_profile.tsv` is generated from CLTS's BIPA transcription system (List, Anderson, Tresoldi, Rzymski & Forkel; CC-BY-4.0; DOI [10.5281/zenodo.3515744](https://doi.org/10.5281/zenodo.3515744)) — see [`cv-patterns/SPEC.md`'s Licensing and attribution section](cv-patterns/SPEC.md#licensing-and-attribution) for the full credit and what was changed.
 
