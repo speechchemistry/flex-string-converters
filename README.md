@@ -99,7 +99,14 @@ Run `python -m pytest` from the repository root, which discovers every project's
 
 To run just one project's tests, point pytest at that project's `tests/` folder, e.g. `python -m pytest cv-patterns/tests/`.
 
-If you have held-out data — real input plus its independently correct output, add it as a fixture directly: drop the input as a `.txt` file into `<project>/tests/fixtures/<converter>/inputs/` e.g. `cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt` and drop the already-known-correct output straight into `<project>/tests/fixtures/<converter>/approved/` under the same filename with a `.approved.txt` extension e.g. `cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt` . Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file. The following example also includes the input to make it easier to read. 
+If you have held-out data — real input plus its independently correct output, add it as a fixture directly: drop the input as a `.txt` file into `<project>/tests/fixtures/<converter>/inputs/` and drop the already-known-correct output straight into `<project>/tests/fixtures/<converter>/approved/` under the same filename with a `.approved.txt` extension, e.g. create the files:
+
+```
+cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt
+cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt
+```
+
+Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file. The following example also includes the input to make it easier to read: 
 
 Linux/bash:
 ```
@@ -110,11 +117,9 @@ Windows/powershell:
 ```
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $enc = [System.Text.Encoding]::UTF8
-
 $in  = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt"), $enc)
 $rec = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/received/chumburung.received.txt"), $enc)
 $app = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt"), $enc)
-
 for ($i = 0; $i -lt $in.Count; $i++) {
     if ($rec[$i] -ne $app[$i]) {
         Write-Host "$($in[$i])" -NoNewline
