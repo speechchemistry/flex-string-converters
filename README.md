@@ -10,7 +10,7 @@ These modules are in development. **Please back up your FLEx project before runn
 
 To install [this repository](https://github.com/speechchemistry/flex-string-converters), scroll up to the green code box, click it and then click Download ZIP. You can then extract it on your computer (e.g. from the Downloads folder).
 
-You will need to ensure that [Python](https://www.python.org/downloads/) is installed on your computer. You will also need to install any third-party package the chosen converter needs, for example type `pip install regex` for the `chao-tone-letters` converters. Each converter's section below names the packages it needs.
+You will need to ensure that Python is installed on your computer. At the time of writing, [Python 3.13](https://www.python.org/downloads/latest/python3.13/) is recommended because Flex supports version 3.9 - 3.13. You will also need to install any third-party package the chosen converter needs, for example type `pip install regex` for the `chao-tone-letters` converters. Each converter's section below names the packages it needs.
 
 <video src="https://github.com/user-attachments/assets/8f6cf6a8-01c9-45f7-96ca-168f3232d0a3" controls="controls"></video>
 
@@ -33,7 +33,7 @@ $ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'nə̀jɛ�
 nə˨jɛ˨˧t
 ```
 
-It needs Python 3 and the `regex` package (`pip install regex`); FieldWorks is not required to run it from the command line.
+It needs Python 3 and the `regex` package (`pip install regex`).
 
 It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone_diacritics.py` to demonstrate how these converters can be used with FlexTools.
 
@@ -90,9 +90,15 @@ See [AGENTS.md](AGENTS.md) for the full contributor conventions and [SPEC.md](SP
 
 ## Tests
 
-Run `python -m pytest` from the repository root, which discovers every project's own `tests/` folder in one run, plus the repository-wide `tests/` holding only the shared approval-testing harness. All of it runs on any platform: converter tests need no FLEx project, and module tests stub `flextoolslib` and drive `MainFunction` with a fake project and report object.
+Run `python -m pytest` from the repository root, which discovers every project's own `tests/` folder in one run, plus the repository-wide `tests/` holding only the shared approval-testing harness.
 
-`diacritics2chao.py`'s and `chao2diacritics.py`'s CLIs are additionally covered end to end by approval tests — input fixtures and their approved outputs under each converter's `tests/fixtures/<converter>/`, compared exactly with no scrubbing or Unicode normalisation. See [AGENTS.md's Testing Approach](AGENTS.md#testing-approach) for the full convention, and the [`adding-an-approval-fixture`](.claude/skills/adding-an-approval-fixture/SKILL.md) skill for adding a fixture or approving a changed one.
+To run just one project's tests, point pytest at that project's `tests/` folder, e.g. `python -m pytest cv-patterns/tests/`.
+
+If you have held-out data — real input plus its independently correct output, add it as a fixture directly: drop the input as a `.txt` file into `<project>/tests/fixtures/<converter>/inputs/` e.g. `cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt` and drop the already-known-correct output straight into `<project>/tests/fixtures/<converter>/approved/` under the same filename with a `.approved.txt` extension e.g. `cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt` . Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file e.g.
+
+```
+$ git diff --no-index cv-patterns/tests/fixtures/phonemes2cv/received/chumburung.received.txt cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt 
+```
 
 ## License
 
