@@ -2,9 +2,14 @@
 
 <img src="images/cropped_flex_demo.png" align="right" width="400" hspace="15" vspace="10">
 
-String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a **FLEx Process** run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
+String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a FLEx Process run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
 
-These modules are in development. **Please back up your FLEx project before running any of them**.
+The current modules include:
+- `chao-tone-letters`: Convert from diacritic tone marks to Chao tone letters and back again
+- `cv-patterns`: Convert from a phonemic (or phonetic) transcription to CV patterns
+- `zhire`: Convert from phonetic to phonemic to orthographic (language specific example)
+
+These modules are in development. Please back up your FLEx project before running any of them.
 
 ## Installation
 
@@ -94,10 +99,29 @@ Run `python -m pytest` from the repository root, which discovers every project's
 
 To run just one project's tests, point pytest at that project's `tests/` folder, e.g. `python -m pytest cv-patterns/tests/`.
 
-If you have held-out data — real input plus its independently correct output, add it as a fixture directly: drop the input as a `.txt` file into `<project>/tests/fixtures/<converter>/inputs/` e.g. `cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt` and drop the already-known-correct output straight into `<project>/tests/fixtures/<converter>/approved/` under the same filename with a `.approved.txt` extension e.g. `cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt` . Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file e.g.
+If you have held-out data — real input plus its independently correct output, add it as a fixture directly: drop the input as a `.txt` file into `<project>/tests/fixtures/<converter>/inputs/` e.g. `cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt` and drop the already-known-correct output straight into `<project>/tests/fixtures/<converter>/approved/` under the same filename with a `.approved.txt` extension e.g. `cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt` . Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file. The following example also includes the input to make it easier to read. 
 
+Linux/bash:
 ```
-$ git diff --no-index cv-patterns/tests/fixtures/phonemes2cv/received/chumburung.received.txt cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt 
+$ git diff --no-index --word-diff <(paste cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt cv-patterns/tests/fixtures/phonemes2cv/received/chumburung.received.txt) <(paste cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt)
+```
+
+Windows/powershell:
+```
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$enc = [System.Text.Encoding]::UTF8
+
+$in  = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt"), $enc)
+$rec = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/received/chumburung.received.txt"), $enc)
+$app = [System.IO.File]::ReadAllLines((Resolve-Path "cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt"), $enc)
+
+for ($i = 0; $i -lt $in.Count; $i++) {
+    if ($rec[$i] -ne $app[$i]) {
+        Write-Host "$($in[$i])" -NoNewline
+        Write-Host "  received=$($rec[$i])" -ForegroundColor Red -NoNewline
+        Write-Host "  approved=$($app[$i])" -ForegroundColor Green
+    }
+}
 ```
 
 ## License
