@@ -2,7 +2,7 @@
 
 <img src="images/cropped_flex_demo.png" align="right" width="400" hspace="15" vspace="10">
 
-String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a FLEx Process run over a whole column of lexicon data with no extra installation step. Each converter also runs from the command line on its own, and can also be used with  FlexTools.
+String converters for linguistic data. The primary way to use one is directly inside SIL FieldWorks Language Explorer (FLEx), as a FLEx Process run over a whole column of lexicon data. Each converter also runs from the command line on its own, and can also be used with FlexTools.
 
 The current modules include:
 - `chao-tone-letters`: Convert from diacritic tone marks to Chao tone letters and back again
@@ -31,14 +31,14 @@ Converting between tone diacritics and Chao tone letters. Not specific to any on
 
 Strips tone diacritics from the input and appends its Chao tone letters, e.g. `nə̀jɛ᷅t` → `nəjɛt ˨ ˨˧`. As a FLEx Process this is the `diacritics2chao` process. Point at `diacritics2chao_attached.py` instead for the `--attached` form below, or `diacritics2chao_tone_letters_only.py` for the tone letters alone with no base text.
 
-`--attached` writes each tone letter after the syllable it marks instead of gathering them into a trailing section. That form carries no meaning in its spacing, so unlike the default it survives a pipeline, spreadsheet or copy-paste that collapses runs of spaces:
+`--attached` writes each tone letter after the syllable it marks instead of gathering them into a trailing section:
 
 ```
 $ python3 chao-tone-letters/converters/diacritics2chao.py --attached 'nə̀jɛ᷅t'
 nə˨jɛ˨˧t
 ```
 
-It needs Python 3 and the `regex` package (`pip install regex`).
+It needs the `regex` package (`pip install regex`).
 
 It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone_diacritics.py` to demonstrate how these converters can be used with FlexTools.
 
@@ -48,7 +48,7 @@ It's also available as the FlexTools module `Extract_Chao_tone_letters_from_tone
 
 Reverses `diacritics2chao.py`: places Chao tone letters back onto their base text as tone diacritics, e.g. `nəjɛt ˨ ˨˧` → `nə̀jɛ᷅t`. As a FLEx Process this is the `chao2diacritics` process.
 
-Where the tone letters sit doesn't matter — attached to their syllable, gathered before or after the text, or a mixture all give the same result. A line that doesn't correspond to a valid tone-letter reading (an unaccounted syllable, or a contour with no diacritic equivalent) is returned unchanged rather than partially converted, with a warning to stderr naming the line, so the exit status stays 0 and an existing pipeline doesn't break:
+Where the tone letters sit doesn't matter — attached to their syllable, gathered before or after the text, or a mixture all give the same result. A line that doesn't correspond to a valid tone-letter reading (an unaccounted syllable, or a contour with no diacritic equivalent) is returned unchanged rather than partially converted, with a warning to stderr naming the line.
 
 ```
 $ python3 chao-tone-letters/converters/chao2diacritics.py 'ma ti ˦  ˦˨' 'ma˦ ti˦˨'
@@ -73,7 +73,7 @@ CVCVC
 
 A tie bar joins two symbols into one phone (`t͡ʃa` → `CV`); without one, the same letters are two phones (`tʃa` → `CCV`). That is a deliberate choice for now, not a bug. An unrecognised symbol becomes `?` with a warning produced in the command line version.
 
-It needs Python 3 and the [`segments`](https://pypi.org/project/segments/) package (`pip install segments`), the orthography-profile tokeniser from Moran & Cysouw's Unicode Cookbook.
+It needs the [`segments`](https://pypi.org/project/segments/) package (`pip install segments`), a tokeniser from Moran & Cysouw's Unicode Cookbook.
 
 ## `zhire/`
 
@@ -81,7 +81,7 @@ A second, smaller project — mainly here to illustrate what's possible for a la
 
 `phonetic2phonemic.py` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic transcription into a phonemic one, e.g. `ɲápsə́` → `njápsə́` (the `phonetic2phonemic` FLEx Process). `phonemic2orthography.py` then strips tone diacritics (the orthography has no tone-marking convention yet) and maps the phonemic string to its orthographic spelling, e.g. `hwōrì` → `whori` (the `phonemic2orthography` FLEx Process). Both raise an error naming the offending input if a symbol or sequence isn't covered, rather than passing it through unchanged or dropping it silently.
 
-Both need Python 3 and the `pynini` package — prebuilt wheels exist on PyPI for Linux only (`pip install pynini`); macOS and Windows need conda-forge instead (`conda install -c conda-forge pynini`), with an extra step on Windows specifically for the FLEx Process case — see [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini).
+These Zhire examples were built partly to test a way of keeping the conversion simple: constraining it to a single, well-defined pattern — a finite-state transducer, built with the `pynini` package. However this does complicate the installation process especially on Windows. See [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini).
 
 ## Adding a new converter
 
