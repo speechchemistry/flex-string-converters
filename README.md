@@ -7,7 +7,7 @@ String converters for linguistic data. The primary way to use one is directly in
 The current modules include:
 - `chao-tone-letters`: Convert from diacritic tone marks to Chao tone letters and back again
 - `cv-patterns`: Convert from a phonemic (or phonetic) transcription to CV patterns
-- `zhire`: Convert from phonetic to phonemic to orthographic (language specific example)
+- `zhire`: Convert from phonetic to phonemic to orthographic (language-specific example)
 
 These modules are in development. Please back up your FLEx project before running any of them.
 
@@ -19,7 +19,7 @@ You will need to ensure that Python is installed on your computer. At the time o
 
 <video src="https://github.com/user-attachments/assets/8f6cf6a8-01c9-45f7-96ca-168f3232d0a3" controls="controls"></video>
 
-This video shows how to use the Bulk Edit Entries → Process → Setup... to setup the `diacritics2chao_tone_letters_only` process (one of `chao-tone-letters/`'s converters). It is just a case of specifying the Python script file and the Python DLL file. (It is best not to use different DLL files in one Flex session as you might need to restart Flex to use each different module) 
+This video shows how to use the Bulk Edit Entries → Process → Setup... to setup the `diacritics2chao_tone_letters_only` process (one of `chao-tone-letters/`'s converters). It is just a case of specifying the Python script file and the Python DLL file. (It is best not to use different DLL files in one Flex session as you might need to restart Flex to use each different module)
 
 ## `chao-tone-letters/`
 
@@ -60,7 +60,7 @@ It needs the same `regex` package as `diacritics2chao.py`.
 
 ## `cv-patterns/`
 
-Turning a phonemic (or phonetic) transcription into its CV pattern. Not specific to any one language, and deliberately small: the output alphabet is just `C` and `V`. 
+Turning a phonemic (or phonetic) transcription into its CV pattern. Not specific to any one language, and deliberately small: the output alphabet is just `C` and `V`.
 
 ### `phonemes2cv.py`
 
@@ -79,7 +79,7 @@ It needs the [`segments`](https://pypi.org/project/segments/) package (`pip inst
 
 A second, smaller project — mainly here to illustrate what's possible for a language with its own orthography, rather than the day-to-day tool the `chao-tone-letters/` converters above are. It converts a Zhire `[zhi]` phonetic or phonemic transcription to its orthographic spelling; the two converters compose: phonetic → phonemic → orthography.
 
-`phonetic2phonemic.py` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic transcription into a phonemic one, e.g. `ɲápsə́` → `njápsə́` (the `phonetic2phonemic` FLEx Process). `phonemic2orthography.py` then strips tone diacritics (the orthography has no tone-marking convention yet) and maps the phonemic string to its orthographic spelling, e.g. `hwōrì` → `whori` (the `phonemic2orthography` FLEx Process). Both raise an error naming the offending input if a symbol or sequence isn't covered, rather than passing it through unchanged or dropping it silently.
+`phonetic2phonemic.py` applies the Zhire phonology sketch's allophony and notation rules to turn a phonetic transcription into a phonemic one, e.g. `nzo᷇ɾ` → `ndzo᷇r` (the `phonetic2phonemic` FLEx Process). `phonemic2orthography.py` then strips tone diacritics (the orthography has no tone-marking convention yet) and maps the phonemic string to its orthographic spelling, e.g. `hwōrì` → `whori` (the `phonemic2orthography` FLEx Process). Both raise an error naming the offending input if a symbol or sequence isn't covered, rather than passing it through unchanged or dropping it silently.
 
 These Zhire examples were built partly to test a way of keeping the conversion simple: constraining it to a single, well-defined pattern — a finite-state transducer, built with the `pynini` package. However this does complicate the installation process especially on Windows. See [`zhire/SPEC.md`'s Installing Pynini section](zhire/SPEC.md#installing-pynini).
 
@@ -106,7 +106,7 @@ cv-patterns/tests/fixtures/phonemes2cv/inputs/chumburung.txt
 cv-patterns/tests/fixtures/phonemes2cv/approved/chumburung.approved.txt
 ```
 
-Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file. The following example also includes the input to make it easier to read: 
+Then run `python -m pytest`. A failure here means the converter is wrong (or the ground truth is). The error message can be a lot to read, so it's often easier to 'diff' the output file against approved file. The following example also includes the input to make it easier to read:
 
 Linux/bash:
 ```
